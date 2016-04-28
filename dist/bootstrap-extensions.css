@@ -1,0 +1,47 @@
+.btn-xlarge {
+    width: 240px;
+    padding: 18px 28px;
+    font-size: 22px;
+    line-height: normal;
+    -webkit-border-radius: 8px;
+       -moz-border-radius: 8px;
+            border-radius: 8px;
+
+    }
+
+.row-margin {
+  margin-top: 20px;
+}
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.delete-color {
+  color: red;
+}
+
+.delete-button-column {
+  display:block;
+  text-align:center;
+}
+
+a.glyphicon-remove-circle {
+  font-size: 1.5em;
+}
+
+.btn-standard-size {
+  width: 120px;
+  height: 40px;
+  padding: 9px 18px;
+  font-size: 18px;
+  background-color: #00ff00;
+  line-height: normal;
+  -webkit-border-radius: 8px;
+     -moz-border-radius: 8px;
+          border-radius: 8px;
+
+  }
+}
