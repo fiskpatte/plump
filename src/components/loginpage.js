@@ -8,7 +8,7 @@ class LoginPage extends React.Component {
   }
 
   signupButtonClicked(){
-    console.log('sieg heil');
+    console.log('');
   }
 
   render() {
@@ -18,11 +18,20 @@ class LoginPage extends React.Component {
           <p>NU SKA VI SPELA PLUMP</p>
         </div>
         <div>
-          Logga in eller <span><button onClick={this.signupButtonClicked.bind(this)}> registrera dig</button></span>
+          <button>Logga in med Facebook</button>
         </div>
         <div>
-          <button className="btn btn-social btn-lg btn-facebook"><i className="fa fa-facebook"></i>Sign in with Facebook</button>
+        <p>-----eller-----</p>
         </div>
+        <div>
+          <input type="text" placeholder="Email"/>
+          <input type="password" placeholder="Lösenord"/>
+        </div>
+        <div>
+          <span><input id="checkBoxRememberMe" type="checkbox" value="yes"/>Kom ihåg mig</span><button>Logga in</button>
+        </div>
+        <a href="¤">Har du glömt dina inloggningsuppgifter?</a>
+        <button>Registrera dig</button>
       </div>
     )
   }
