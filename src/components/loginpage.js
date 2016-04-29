@@ -1,10 +1,35 @@
 import React from 'react';
 
+var root = new Firebase("https://plump.firebaseio.com");
+// Om man redan är inloggad ska man redirectas till loggedInPage
 
 class LoginPage extends React.Component {
+
   constructor(props){
     super(props);
 
+    root.onAuth(routeUserToLoggedInPageCallback);
+  }
+
+  componentWillMount(){
+    var authData = root.getAuth();
+    if(authData){
+      // Routra usern till loggedInPage
+    }
+  }
+
+  routeUserToLoggedInPageCallback(){
+    // Här ska kod finnas som routrar om usern till loggedInPage
+  }
+
+  loginWithFacebookButtonClicked(){
+    root.authWithOAuthPopup("facebook", function(error, authData){
+      if(error){
+        console.log("Login failed", error);
+      } else {
+        console.log("Logged in")
+      }
+    });
   }
 
   signupButtonClicked(){
@@ -15,10 +40,10 @@ class LoginPage extends React.Component {
     return (
       <div>
         <div>
-          <p>NU SKA VI SPELA PLUMP</p>
+          <p>PLUMP</p>
         </div>
         <div>
-          <button>Logga in med Facebook</button>
+          <button onClick={this.loginWithFacebookButtonClicked.bind(this)}>Logga in med Facebook</button>
         </div>
         <div>
         <p>-----eller-----</p>
