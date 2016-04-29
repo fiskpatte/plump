@@ -15,10 +15,10 @@
   "license": "ISC",
   "babel": {
     "presets": [
-        "es2015",
-        "react"
+      "es2015",
+      "react"
     ]
-},
+  },
   "bugs": {
     "url": "https://github.com/fiskpatte/plump/issues"
   },
@@ -36,6 +36,6 @@
     "history": "^2.1.1",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
-    "react-router": "^2.3.0"
+    "react-router": "^2.4.0"
   }
 }
