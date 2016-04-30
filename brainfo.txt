@@ -1,0 +1,7 @@
+För att starta webpack:
+Öppna bash, ställ dig i plump-foldern.
+Skriv webpack-dev-server [enter].
+Låt detta fönster stå öppet orört.
+
+Spotifys inloggning som vi kan utgå från:
+https://accounts.spotify.com/sv/login?continue=https:%2F%2Fwww.spotify.com%2Fse%2Faccount%2Foverview%2F
