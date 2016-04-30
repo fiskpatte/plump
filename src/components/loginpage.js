@@ -14,15 +14,15 @@ class LoginPage extends React.Component {
     usersRef.on("value", function(snapshot){
       const newUsers = [];
       var usersInDB = snapshot.val();
-      for(var userId in this.state.users){
-          newUsers.push({key: userId, user: usersInDB[userId]});
+      for(var userId in usersInDB){
+          newUsers.push(usersInDB[userId]);
       }
       var newState = self.state;
       newState.users = newUsers;
       self.setState(newState);
     });
 
-    root.onAuth(routeUserToLoggedInPageCallback);
+    //root.onAuth(routeUserToLoggedInPageCallback);
   }
 
   componentWillMount(){
@@ -32,35 +32,39 @@ class LoginPage extends React.Component {
     }
   }
 
-  // Här ska kod finnas som routrar om usern till loggedInPage
-  routeUserToLoggedInPageCallback(){
-
-  }
-
-  // returnerar true om userns inte finns sedan innan.
-  firstTimeLoggingIn(authData){
-/*    var firstTime = true;
-    var uid = authData.uid;
-    foreach(var user in this.state.users){
-      if(user.uid === uid){
-        firstTime = false;
-      }
-    }
-    return firstTime;*/
-  }
-
   loginWithFacebookButtonClicked(){
-/*    root.authWithOAuthPopup("facebook", function(error, authData){
+    var self = this;
+    root.authWithOAuthPopup("facebook", function(error, authData){
       if(error){
         console.log("Login failed", error);
       } else {
         // kolla om usern redan finns
         // om inte, skapa ny user.
-        if(firstTimeLoggingIn(authData)){
-
+        var userExists = false;
+        var uid = authData.uid;
+        for(var user in self.state.users){
+          if(self.state.users[user].userid === uid){
+            userExists = true;
+          }
         }
+
+        if(!userExists){
+          const userid = authData.uid;
+          const newUser = {
+            userid,
+            value: {
+              "displayname": authData.facebook.displayName,
+              "totalscore": 0
+            }
+          };
+          root.child('users').push(newUser);
+
+        } else{
+          console.log('HAN FANNS REDAN!');
+        }
+        // redirecta till inloggningssidan
       }
-    });*/
+    });
   }
 
   signupButtonClicked(){
