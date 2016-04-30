@@ -14,7 +14,7 @@ class LoginPage extends React.Component {
     usersRef.on("value", function(snapshot){
       const newUsers = [];
       var usersInDB = snapshot.val();
-      for(var userId in usersInDB){
+      for(var userId in this.state.users){
           newUsers.push({key: userId, user: usersInDB[userId]});
       }
       var newState = self.state;
@@ -39,18 +39,18 @@ class LoginPage extends React.Component {
 
   // returnerar true om userns inte finns sedan innan.
   firstTimeLoggingIn(authData){
-    var firstTime = true;
+/*    var firstTime = true;
     var uid = authData.uid;
     foreach(var user in this.state.users){
       if(user.uid === uid){
         firstTime = false;
       }
     }
-    return firstTime;
+    return firstTime;*/
   }
 
   loginWithFacebookButtonClicked(){
-    root.authWithOAuthPopup("facebook", function(error, authData){
+/*    root.authWithOAuthPopup("facebook", function(error, authData){
       if(error){
         console.log("Login failed", error);
       } else {
@@ -60,7 +60,7 @@ class LoginPage extends React.Component {
 
         }
       }
-    });
+    });*/
   }
 
   signupButtonClicked(){
