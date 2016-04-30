@@ -8,6 +8,20 @@ class LoginPage extends React.Component {
   constructor(props){
     super(props);
 
+    this.state = {users: []};
+    var self = this;
+    var usersRef = root.child('users');
+    usersRef.on("value", function(snapshot){
+      const newUsers = [];
+      var usersInDB = snapshot.val();
+      for(var userId in usersInDB){
+          newUsers.push({key: userId, user: usersInDB[userId]});
+      }
+      var newState = self.state;
+      newState.users = newUsers;
+      self.setState(newState);
+    });
+
     root.onAuth(routeUserToLoggedInPageCallback);
   }
 
@@ -18,8 +32,21 @@ class LoginPage extends React.Component {
     }
   }
 
+  // Här ska kod finnas som routrar om usern till loggedInPage
   routeUserToLoggedInPageCallback(){
-    // Här ska kod finnas som routrar om usern till loggedInPage
+
+  }
+
+  // returnerar true om userns inte finns sedan innan.
+  firstTimeLoggingIn(authData){
+    var firstTime = true;
+    var uid = authData.uid;
+    foreach(var user in this.state.users){
+      if(user.uid === uid){
+        firstTime = false;
+      }
+    }
+    return firstTime;
   }
 
   loginWithFacebookButtonClicked(){
@@ -27,7 +54,11 @@ class LoginPage extends React.Component {
       if(error){
         console.log("Login failed", error);
       } else {
-        console.log("Logged in")
+        // kolla om usern redan finns
+        // om inte, skapa ny user.
+        if(firstTimeLoggingIn(authData)){
+
+        }
       }
     });
   }
