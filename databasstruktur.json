@@ -1,0 +1,20 @@
+{
+  "users": {
+    "userid1": {
+      "displayname": "string",
+      "totalscore": 12,
+
+    }
+  },
+  "games": {
+    "gameid1": {
+      "users": {
+        "user1": "userid",
+        "user2": "userid",
+        "user3": "userid",
+        "user4": "userid"
+      },
+      
+    }
+  }
+}
