@@ -1,12 +1,18 @@
 import React from 'react';
+import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 
 var root = new Firebase("https://plump.firebaseio.com");
 // Om man redan är inloggad ska man redirectas till loggedInPage
 
 class LoginPage extends React.Component {
 
+  contextTypes = {
+    router: React.PropTypes.object
+  };
+
   constructor(props){
     super(props);
+
     this.state = {users: []};
     var self = this;
     var usersRef = root.child('users');
@@ -41,8 +47,9 @@ class LoginPage extends React.Component {
         // om inte, skapa ny user.
         var userExists = false;
         var uid = authData.uid;
+        //console.log(self.state.users[0]);
         for(var user in self.state.users){
-          if(self.state.users[user].userid === uid){
+          if(self.state.users[user].uid === uid){
             // usern fanns redan
             userExists = true;
           }
@@ -50,14 +57,19 @@ class LoginPage extends React.Component {
         if(!userExists){
           const userid = authData.uid;
           const newUser = {
+              "uid": userid,
               "displayname": authData.facebook.displayName,
               "totalscore": 0
             };
-          root.child('users').child(userid).set(newUser);
+          root.child('users').push(newUser);
         } else{
           console.log('HAN FANNS REDAN!');
         }
         // redirecta till inloggningssidan
+        self.context.router.push({ //browserHistory.push should also work here
+          pathname: '/lobby',
+          state: {userid: this.userid}
+        });
       }
     });
   }
