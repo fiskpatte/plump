@@ -7,7 +7,6 @@ class LoginPage extends React.Component {
 
   constructor(props){
     super(props);
-
     this.state = {users: []};
     var self = this;
     var usersRef = root.child('users');
@@ -44,21 +43,17 @@ class LoginPage extends React.Component {
         var uid = authData.uid;
         for(var user in self.state.users){
           if(self.state.users[user].userid === uid){
+            // usern fanns redan
             userExists = true;
           }
         }
-
         if(!userExists){
           const userid = authData.uid;
           const newUser = {
-            userid,
-            value: {
               "displayname": authData.facebook.displayName,
               "totalscore": 0
-            }
-          };
-          root.child('users').push(newUser);
-
+            };
+          root.child('users').child(userid).set(newUser);
         } else{
           console.log('HAN FANNS REDAN!');
         }
