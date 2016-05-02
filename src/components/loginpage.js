@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {contextTypes} from 'react';
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 
 var root = new Firebase("https://plump.firebaseio.com");
@@ -6,9 +6,7 @@ var root = new Firebase("https://plump.firebaseio.com");
 
 class LoginPage extends React.Component {
 
-  contextTypes = {
-    router: React.PropTypes.object
-  };
+
 
   constructor(props){
     super(props);
@@ -66,10 +64,7 @@ class LoginPage extends React.Component {
           console.log('HAN FANNS REDAN!');
         }
         // redirecta till inloggningssidan
-        self.context.router.push({ //browserHistory.push should also work here
-          pathname: '/lobby',
-          state: {userid: this.userid}
-        });
+        browserHistory.push('/lobby');
       }
     });
   }
