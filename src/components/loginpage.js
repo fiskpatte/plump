@@ -2,6 +2,7 @@ import React, {contextTypes} from 'react';
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 
 var root = new Firebase("https://plump.firebaseio.com");
+var usersRef = root.child('users');
 // Om man redan är inloggad ska man redirectas till loggedInPage
 
 class LoginPage extends React.Component {
@@ -13,7 +14,6 @@ class LoginPage extends React.Component {
 
     this.state = {users: []};
     var self = this;
-    var usersRef = root.child('users');
     usersRef.on("value", function(snapshot){
       const newUsers = [];
       var usersInDB = snapshot.val();
@@ -33,6 +33,11 @@ class LoginPage extends React.Component {
     if(authData){
       // Routra usern till loggedInPage
     }
+  }
+
+  componentWillUnmount(){
+    
+    usersRef.off();
   }
 
   loginWithFacebookButtonClicked(){

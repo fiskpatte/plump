@@ -10,10 +10,11 @@ class Lobby extends React.Component{
     if(!authData){
       console.log('ej inloggad');
     } else {
-      console.log(authData.uid);
+      //console.log(authData.uid);
     }
     const userid = authData.uid;
     this.state = {user: userid};
+    console.log(this.state.userid)
 
   }
 
