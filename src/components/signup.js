@@ -12,7 +12,9 @@ class SignUp extends React.Component {
   render(){
     return (
       <div>
-
+        <input type="text" placeholder="Ange din emailadress"/>
+        <input type="password" placeholder="Välj ett lösenord"/>
+        <button type="submit">OK</button>
       </div>
     )
   }
