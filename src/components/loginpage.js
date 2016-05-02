@@ -36,7 +36,7 @@ class LoginPage extends React.Component {
   }
 
   componentWillUnmount(){
-    
+
     usersRef.off();
   }
 
@@ -75,7 +75,7 @@ class LoginPage extends React.Component {
   }
 
   signupButtonClicked(){
-    console.log('');
+    browserHistory.push('/signup');
   }
 
   render() {
