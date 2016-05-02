@@ -14,6 +14,7 @@ class SignUp extends React.Component {
     var inputedPassword = $('passwordInputField').val();
 
     root.createUser({
+      
       email    : inputedEmail,
       password : inputedPassword
     }, function(error, userData) {
@@ -48,3 +49,5 @@ class SignUp extends React.Component {
     )
   }
 }
+
+export default SignUp;

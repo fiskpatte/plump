@@ -98,7 +98,7 @@ class LoginPage extends React.Component {
           <span><input id="checkBoxRememberMe" type="checkbox" value="yes"/>Kom ihåg mig</span><button>Logga in</button>
         </div>
         <a href="¤">Har du glömt dina inloggningsuppgifter?</a>
-        <button>Registrera dig</button>
+        <button onClick={this.signupButtonClicked.bind(this)}>Registrera dig</button>
       </div>
     )
   }
