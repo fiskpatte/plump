@@ -31,13 +31,13 @@ class LoginPage extends React.Component {
   componentWillMount(){
     var authData = root.getAuth();
     if(authData){
-      // Routra usern till loggedInPage
+      // Routra usern till Lobby
     }
   }
 
   componentWillUnmount(){
-
     usersRef.off();
+    root.off();
   }
 
   loginWithFacebookButtonClicked(){
@@ -60,11 +60,10 @@ class LoginPage extends React.Component {
         if(!userExists){
           const userid = authData.uid;
           const newUser = {
-              "uid": userid,
               "displayname": authData.facebook.displayName,
               "totalscore": 0
             };
-          root.child('users').push(newUser);
+          root.child('users').child(userid).set(newUser);
         } else{
           console.log('HAN FANNS REDAN!');
         }
@@ -85,7 +84,7 @@ class LoginPage extends React.Component {
           <p>PLUMP</p>
         </div>
         <div>
-          <button onClick={this.loginWithFacebookButtonClicked.bind(this)}>Logga in med Facebook</button>
+          <button id="signUpButton" onClick={this.loginWithFacebookButtonClicked.bind(this)}>Logga in med Facebook</button>
         </div>
         <div>
         <p>-----eller-----</p>

@@ -10,11 +10,14 @@ class SignUp extends React.Component {
   }
 
   submitButtonClicked(){
-    var inputedEmail = $('emailInputField').val();
-    var inputedPassword = $('passwordInputField').val();
+    var inputedEmail = $('#emailInputField').val();
+    var inputedPassword = $('#passwordInputField').val();
 
+    console.log('ost');
+    console.log(inputedEmail);
+    console.log(inputedPassword);
     root.createUser({
-      
+
       email    : inputedEmail,
       password : inputedPassword
     }, function(error, userData) {
@@ -22,23 +25,12 @@ class SignUp extends React.Component {
         console.log("Error creating user:", error);
       } else {
         console.log("Successfully created user account with uid:", userData.uid);
-        root.authWithPassword({
-          email    : inputedEmail,
-          password : inputedPassword
-        }, function(error, authData) {
-          if (error) {
-            console.log("Login Failed!", error);
-          } else {
-            console.log("Authenticated successfully with payload:", authData);
-            browserHistory.push('/lobby');
-          }
-        });
       }
     });
   }
 
-  render(){
-    return (
+  render() {
+    return(
       <div>
         <form>
           <input id="emailInputField" type="email" placeholder="Ange din emailadress" required/>
