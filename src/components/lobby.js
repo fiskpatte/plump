@@ -1,12 +1,15 @@
 import React from 'react';
 
 var root = new Firebase("https://plump.firebaseio.com");
-var authData = root.getAuth();
-var loggedinuserRef = root.child('users').child(authData.uid);
+var authData;
+var loggedinuserRef;
+
 var gamesRef = root.child('games');
 
 class Lobby extends React.Component{
   constructor(props){
+    authData = root.getAuth();
+    loggedinuserRef = root.child('users').child(authData.uid);
     super(props);
     const opengames = [];
     this.state = {uid: '', username: '', userTotalScore: 0, openGames: opengames};
@@ -41,6 +44,7 @@ class Lobby extends React.Component{
   componentWillUnmount(){
     root.off();
     loggedinuserRef.off();
+    loggedinuserRef.off();
   }
 
   newGameButtonClicked(){
@@ -70,13 +74,13 @@ class Lobby extends React.Component{
           <div key={index} className="openGame">
             <p>Spelare 1: {openGame.player1}</p>
             <div className="playerSlot">{openGame.player2 == "" ? <button onClick={this.takeSlotButtonClick.bind(this)}>Ta plats</button>
-                                    : openGame.player2}
+                                    : "Spelare 2: " + openGame.player2}
             </div>
             <div className="playerSlot">{openGame.player3 == "" ? <button onClick={this.takeSlotButtonClick.bind(this)}>Ta plats</button>
-                                    : openGame.player3}
+                                    : "Spelare 4: " + openGame.player3}
             </div>
             <div className="playerSlot">{openGame.player4 == "" ? <button onClick={this.takeSlotButtonClick.bind(this)}>Ta plats</button>
-                                    : openGame.player4}
+                                    : "Spelare 4: " + openGame.player4}
             </div>
           </div>
         ))}

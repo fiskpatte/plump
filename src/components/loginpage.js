@@ -12,7 +12,7 @@ class LoginPage extends React.Component {
   constructor(props){
     super(props);
 
-    this.state = {users: []};
+    this.state = {users: [], auth: ''};
     var self = this;
     usersRef.on("value", function(snapshot){
       const newUsers = [];
@@ -29,10 +29,17 @@ class LoginPage extends React.Component {
   }
 
   componentWillMount(){
+    var self = this;
     var authData = root.getAuth();
     if(authData){
       // Routra usern till Lobby
+      console.log('Inloggad innan mount. Försöker logga ut.');
+      root.unauth();
     }
+  }
+
+  debugAuth(){
+    console.log(root.authData.uid);
   }
 
   componentWillUnmount(){
@@ -77,6 +84,10 @@ class LoginPage extends React.Component {
     browserHistory.push('/signup');
   }
 
+  logoutButtonClicked(){
+    root.unauth();
+  }
+
   render() {
     return (
       <div>
@@ -98,6 +109,8 @@ class LoginPage extends React.Component {
         </div>
         <a href="¤">Har du glömt dina inloggningsuppgifter?</a>
         <button onClick={this.signupButtonClicked.bind(this)}>Registrera dig</button>
+        <button onClick={this.logoutButtonClicked.bind(this)}>Logga ut</button>
+        <button onClick={this.debugAuth.bind(this)}>kolla auth</button>
       </div>
     )
   }
