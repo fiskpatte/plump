@@ -80,6 +80,22 @@ class LoginPage extends React.Component {
     });
   }
 
+  signInWithEmailButtonClicked(){
+    var inputedEmail = $('#emailInputField').val();
+    var inputedPassword = $('#passwordInputField').val();
+    ref.authWithPassword({
+      email    : inputedEmail,
+      password : inputedPassword
+    }, function(error, authData) {
+      if (error) {
+        console.log("Login Failed!", error);
+      } else {
+        console.log("Authenticated successfully with payload:", authData);
+        browserHistory.push('/lobby');
+      }
+});
+  }
+
   signupButtonClicked(){
     browserHistory.push('/signup');
   }
@@ -101,11 +117,11 @@ class LoginPage extends React.Component {
         <p>-----eller-----</p>
         </div>
         <div>
-          <input type="text" placeholder="Email"/>
-          <input type="password" placeholder="Lösenord"/>
+          <input id="emailInputField" type="text" placeholder="Email"/>
+          <input id="passwordInputField" type="password" placeholder="Lösenord"/>
         </div>
         <div>
-          <span><input id="checkBoxRememberMe" type="checkbox" value="yes"/>Kom ihåg mig</span><button>Logga in</button>
+          <span><input id="checkBoxRememberMe" type="checkbox" value="yes"/>Kom ihåg mig</span><button onClick={this.signInWithEmailButtonClicked.bind(this)}>Logga in</button>
         </div>
         <a href="¤">Har du glömt dina inloggningsuppgifter?</a>
         <button onClick={this.signupButtonClicked.bind(this)}>Registrera dig</button>

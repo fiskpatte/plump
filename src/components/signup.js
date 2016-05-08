@@ -12,10 +12,11 @@ class SignUp extends React.Component {
   submitButtonClicked(){
     var inputedEmail = $('#emailInputField').val();
     var inputedPassword = $('#passwordInputField').val();
+    var inputedUsername = $('#usernameInputField').val();
 
-    console.log('ost');
     console.log(inputedEmail);
     console.log(inputedPassword);
+
     root.createUser({
 
       email    : inputedEmail,
@@ -25,18 +26,38 @@ class SignUp extends React.Component {
         console.log("Error creating user:", error);
       } else {
         console.log("Successfully created user account with uid:", userData.uid);
+        root.authWithPassword({
+          email    : inputedEmail,
+          password : inputedPassword
+        }, function(error, authData) {
+          if (error) {
+            console.log("Login Failed!", error);
+          } else {
+            console.log("Authenticated successfully with payload:", authData);
+
+            const userid = authData.uid;
+            const newUser = {
+                "displayname": inputedUsername,
+                "totalscore": 0
+              };
+            root.child('users').child(userid).set(newUser);
+
+            browserHistory.push('/lobby');
+          }
+        });
       }
     });
   }
 
-  render() {
-    return(
+  render(){
+    return (
       <div>
-        <form>
+
           <input id="emailInputField" type="email" placeholder="Ange din emailadress" required/>
+          <input id="usernameInputField" type="text" placeholder="Välj ett användarnamn" required />
           <input id="passwordInputField" type="password" placeholder="Välj ett lösenord" required/>
-          <button type="submit" onClick={this.submitButtonClicked.bind(this)}>OK</button>
-        </form>
+          <button onClick={this.submitButtonClicked.bind(this)}>OK</button>
+
       </div>
     )
   }
