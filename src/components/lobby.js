@@ -45,6 +45,7 @@ class Lobby extends React.Component{
 
           var game  = {gameid: childSnapshot.key(), player1: childSnapshot.val().player1, player2: childSnapshot.val().player2, player3: childSnapshot.val().player3,  player4: childSnapshot.val().player4};
           console.log(game);
+          gamesRef.child(childSnapshot.key()).child("gameid").set(childSnapshot.key());
           newOpenGames.push(game);
         } else {
           console.log(childSnapshot.key());
