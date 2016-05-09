@@ -83,7 +83,7 @@ class LoginPage extends React.Component {
   signInWithEmailButtonClicked(){
     var inputedEmail = $('#emailInputField').val();
     var inputedPassword = $('#passwordInputField').val();
-    ref.authWithPassword({
+    root.authWithPassword({
       email    : inputedEmail,
       password : inputedPassword
     }, function(error, authData) {
