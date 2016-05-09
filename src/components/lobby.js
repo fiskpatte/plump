@@ -28,7 +28,7 @@ class Lobby extends React.Component{
         self.setState(newState);
     });
 
-    gamesRef.orderByChild("gameState").equalTo("waitingForPlayers").on("value", function(snapshot){
+    gamesRef.on("value", function(snapshot){
       // var openGamesFromFirebase = snapshot.val();
       // // uppdatera this.state.openGames
       // const newOpenGames = [];
@@ -42,8 +42,15 @@ class Lobby extends React.Component{
       snapshot.forEach(function(childSnapshot){
         // if-kollen görs eftersom ett game kan ha blivit tomt pga att en user joinat ett annat game. Då ska detta inte längre med.
         if(childSnapshot.val().player1 != "" || childSnapshot.val().player2 != "" || childSnapshot.val().player3 != "" || childSnapshot.val().player4 != ""){
-          newOpenGames.push({gameid: childSnapshot.key(), player1: childSnapshot.val().player1, player2: childSnapshot.val().player2, player3: childSnapshot.val().player3,  player4: childSnapshot.val().player4});
+
+          var game  = {gameid: childSnapshot.key(), player1: childSnapshot.val().player1, player2: childSnapshot.val().player2, player3: childSnapshot.val().player3,  player4: childSnapshot.val().player4};
+          console.log(game);
+          newOpenGames.push(game);
+        } else {
+          console.log(childSnapshot.key());
+          //usersRef.child((childSnapshot.key()).remove());
         }
+
       });
       var newState = self.state;
       newState.openGames = newOpenGames;
@@ -51,6 +58,8 @@ class Lobby extends React.Component{
     });
 
   }
+
+
 
   componentWillUnmount(){
     root.off();
@@ -61,14 +70,14 @@ class Lobby extends React.Component{
 
   newGameButtonClicked(){
     var self = this;
-      root.child('games').push({
-        "gameid": "",
-        "player1": self.state.uid,
-        "player2" : "",
-        "player3": "",
-        "player4": "",
-        "gameState" : "waitingForPlayers"
-      });
+    root.child('games').push({
+      "gameid": "",
+      "player1": self.state.uid,
+      "player2" : "",
+      "player3": "",
+      "player4": "",
+      "gameState" : "waitingForPlayers"
+    });
   }
 
   takeSlotButtonClick(gameid, slotIndex){
@@ -110,6 +119,7 @@ class Lobby extends React.Component{
           && gamesRef.child(gameid).child('player2') == ""
           && gamesRef.child(gameid).child('player3') == ""
           && gamesRef.child(gameid).child('player4') == ""){
+            console.log("raderar");
             gamesRef.child(gameid).remove();
         }
       }
@@ -124,8 +134,6 @@ class Lobby extends React.Component{
         <p>{this.state.username}</p>
         <p>Poäng: {this.state.userTotalScore}</p>
         <button onClick={this.newGameButtonClicked.bind(this)}>NYTT SPEL</button>
-
-
 
         <p>Öppna spel:</p>
         {this.state.openGames.map((openGame, index) => (
