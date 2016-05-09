@@ -2,6 +2,7 @@ import React from 'react';
 
 var root = new Firebase("https://plump.firebaseio.com");
 var authData;
+var users
 var loggedinuserRef;
 
 var gamesRef = root.child('games');
@@ -50,7 +51,7 @@ class Lobby extends React.Component{
   newGameButtonClicked(){
     var self = this;
       root.child('games').push({
-        "player1": self.state.uid,
+        "player1": self.state.username,
         "player2" : "",
         "player3": "",
         "player4": "",
@@ -72,12 +73,14 @@ class Lobby extends React.Component{
         <p>Öppna spel:</p>
         {this.state.openGames.map((openGame, index) => (
           <div key={index} className="openGame">
-            <p>Spelare 1: {openGame.player1}</p>
+            <div className="playerSlot">{openGame.player1 == "" ? <button onClick={this.takeSlotButtonClick.bind(this)}>Ta plats</button>
+                                    : "Spelare 1: " + openGame.player1}
+            </div>
             <div className="playerSlot">{openGame.player2 == "" ? <button onClick={this.takeSlotButtonClick.bind(this)}>Ta plats</button>
                                     : "Spelare 2: " + openGame.player2}
             </div>
             <div className="playerSlot">{openGame.player3 == "" ? <button onClick={this.takeSlotButtonClick.bind(this)}>Ta plats</button>
-                                    : "Spelare 4: " + openGame.player3}
+                                    : "Spelare 3: " + openGame.player3}
             </div>
             <div className="playerSlot">{openGame.player4 == "" ? <button onClick={this.takeSlotButtonClick.bind(this)}>Ta plats</button>
                                     : "Spelare 4: " + openGame.player4}
