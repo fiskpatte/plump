@@ -76,7 +76,6 @@ class Lobby extends React.Component{
         break;
       }
     }
-    console.log(g);
     if(this.state.uid === game.player1
       || this.state.uid === game.player2
       || this.state.uid === game.player3
@@ -94,6 +93,8 @@ class Lobby extends React.Component{
         <p>{this.state.username}</p>
         <p>Poäng: {this.state.userTotalScore}</p>
         <button onClick={this.newGameButtonClicked.bind(this)}>NYTT SPEL</button>
+
+
 
         <p>Öppna spel:</p>
         {this.state.openGames.map((openGame, index) => (

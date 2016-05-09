@@ -7,8 +7,6 @@ var usersRef = root.child('users');
 
 class LoginPage extends React.Component {
 
-
-
   constructor(props){
     super(props);
 
@@ -24,15 +22,13 @@ class LoginPage extends React.Component {
       newState.users = newUsers;
       self.setState(newState);
     });
-
-    //root.onAuth(routeUserToLoggedInPageCallback);
   }
 
+  // Loggar ut en inloggad person. Detta ska ändras senare, detta var något jag gjorde för att se hur autentisering fungerar.
   componentWillMount(){
     var self = this;
     var authData = root.getAuth();
     if(authData){
-      // Routra usern till Lobby
       console.log('Inloggad innan mount. Försöker logga ut.');
       root.unauth();
     }
@@ -57,7 +53,6 @@ class LoginPage extends React.Component {
         // om inte, skapa ny user.
         var userExists = false;
         var uid = authData.uid;
-        //console.log(self.state.users[0]);
         for(var user in self.state.users){
           if(self.state.users[user].uid === uid){
             // usern fanns redan
@@ -65,14 +60,15 @@ class LoginPage extends React.Component {
           }
         }
         if(!userExists){
+          // skapa ny användare i db
           const userid = authData.uid;
+          var displayName = authData.facebook.displayName;
+          const username = displayName.substr(0, displayName.indexOf(" "));
           const newUser = {
-              "displayname": authData.facebook.displayName,
+              "displayname": username,
               "totalscore": 0
             };
           root.child('users').child(userid).set(newUser);
-        } else{
-          console.log('HAN FANNS REDAN!');
         }
         // redirecta till inloggningssidan
         browserHistory.push('/lobby');
