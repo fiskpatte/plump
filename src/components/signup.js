@@ -38,7 +38,8 @@ class SignUp extends React.Component {
             const userid = authData.uid;
             const newUser = {
                 "displayname": inputedUsername,
-                "totalscore": 0
+                "totalscore": 0,
+                "currenttable": ''
               };
             root.child('users').child(userid).set(newUser);
 

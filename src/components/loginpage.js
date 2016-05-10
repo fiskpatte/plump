@@ -66,7 +66,8 @@ class LoginPage extends React.Component {
           const username = displayName.substr(0, displayName.indexOf(" "));
           const newUser = {
               "displayname": username,
-              "totalscore": 0
+              "totalscore": 0,
+              "currenttable": ''
             };
           root.child('users').child(userid).set(newUser);
         }

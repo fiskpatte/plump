@@ -9,123 +9,108 @@ var gamesRef = root.child('games');
 
 class Lobby extends React.Component{
   constructor(props){
+    super(props);
     authData = root.getAuth();
     loggedinuserRef = root.child('users').child(authData.uid);
-    super(props);
-    const opengames = [];
-    this.state = {uid: '', username: '', userTotalScore: 0, openGames: opengames};
+    // lägg till i state vilket bord usern sist satte sig på. Radera alla andra.
+    this.state = {uid: '', username: '', userTotalScore: 0, openGames: [], currentTable: ''};
   }
 
   componentDidMount(){
     var self = this;
-
     loggedinuserRef.on("value", function(snapshot){
         var userData = snapshot.val();
         var newState = self.state;
         newState.uid = snapshot.key();
+        newState.currentTable = userData.currenttable;
         newState.username = userData.displayname;
         newState.userTotalScore = userData.totalscore;
         self.setState(newState);
     });
 
-    gamesRef.on("value", function(snapshot){
-      // var openGamesFromFirebase = snapshot.val();
-      // // uppdatera this.state.openGames
-      // const newOpenGames = [];
-      // for(var gameIndex in openGamesFromFirebase){
-      //   newOpenGames.push(openGamesFromFirebase[gameIndex]);
-      // }
-      // var newState = self.state;
-      // newState.openGames = newOpenGames;
-      // self.setState(newState);
-      const newOpenGames = [];
-      snapshot.forEach(function(childSnapshot){
-        // if-kollen görs eftersom ett game kan ha blivit tomt pga att en user joinat ett annat game. Då ska detta inte längre med.
-        if(childSnapshot.val().player1 != "" || childSnapshot.val().player2 != "" || childSnapshot.val().player3 != "" || childSnapshot.val().player4 != ""){
+    gamesRef.on('value', function(snapshot){
+      // radera alla games där det inte sitter någon
+      var gamesToRemove = [];
+      snapshot.forEach(game => {
+        // HÄR MÅSTE JAG GÖRA NÅGOT
+        console.log(game.val());
+        if(game.val().gameid != self.state.currentTable){
+          if(game.val().player1 === self.state.uid){
+            gamesRef.child(game.val().gameid).child('player1').set('');
+          } else if(game.val().player2 === self.state.uid){
+            gamesRef.child(game.val().gameid).child('player2').set('');
 
-          var game  = {gameid: childSnapshot.key(), player1: childSnapshot.val().player1, player2: childSnapshot.val().player2, player3: childSnapshot.val().player3,  player4: childSnapshot.val().player4};
-          console.log(game);
-          gamesRef.child(childSnapshot.key()).child("gameid").set(childSnapshot.key());
-          newOpenGames.push(game);
-        } else {
-          console.log(childSnapshot.key());
-          //usersRef.child((childSnapshot.key()).remove());
+          } else if(game.val().player3 === self.state.uid){
+            gamesRef.child(game.val().gameid).child('player3').set('');
+
+          } else if(game.val().player4 === self.state.uid){
+            gamesRef.child(game.val().gameid).child('player4').set('');
+
+          }
         }
 
+        if(game.val().player1 == ""
+          && game.val().player2 == ""
+          && game.val().player3 == ""
+          && game.val().player4 == ""){
+            gamesToRemove.push(game.key());
+        }
       });
-      var newState = self.state;
-      newState.openGames = newOpenGames;
-      self.setState(newState);
+      for(var index in gamesToRemove){
+        gamesRef.child(gamesToRemove[index]).remove();
+      }
     });
 
+
+  gamesRef.on('value', function(snapshot){
+    const newGames = [];
+    var oldGames = snapshot.val();
+    for(var i in oldGames){
+      newGames.push(oldGames[i]);
+    }
+    var newState = self.state;
+    newState.openGames = newGames;
+    self.setState(newState);
+  });
   }
-
-
 
   componentWillUnmount(){
     root.off();
-    loggedinuserRef.off();
-    loggedinuserRef.off();
     gamesRef.off();
+    loggedinuserRef.off();
+    loggedinuserRef.off();
   }
 
   newGameButtonClicked(){
     var self = this;
-    root.child('games').push({
-      "gameid": "",
-      "player1": self.state.uid,
-      "player2" : "",
+    var newGameRef = gamesRef.push();
+    var newGameKey = newGameRef.key();
+    loggedinuserRef.child('currenttable').set(newGameKey);
+    gamesRef.child(newGameKey).set({
+      "gameid": newGameKey,
+      "player1": this.state.uid,
+      "player2": "",
       "player3": "",
-      "player4": "",
-      "gameState" : "waitingForPlayers"
+      "player4": ""
     });
+
+    console.log(newGameKey);
   }
 
   takeSlotButtonClick(gameid, slotIndex){
-    // identifiera rätt game
-    var game;
-    for(var g in this.state.openGames){
-      if(this.state.openGames[g].gameid === gameid){
-        game = this.state.openGames[g];
-        break;
+    var self = this;
+    gamesRef.child(gameid).once('value', function(callback){
+      if(callback.val().player1 == self.state.uid
+        || callback.val().player2 == self.state.uid
+        || callback.val().player3 == self.state.uid
+        || callback.val().player4 == self.state.uid){
+          console.log('Du sitter redan på detta bord!')
+      } else {
+        loggedinuserRef.child('currenttable').set(gameid);
+        gamesRef.child(gameid).child('player'+slotIndex).set(self.state.uid);
       }
-    }
-    // kolla så att man inte redan sitter på det gamet
-    if(this.state.uid === game.player1
-      || this.state.uid === game.player2
-      || this.state.uid === game.player3
-      || this.state.uid === game.player4){
-        console.log("Man kan bara sitta på ett ställe!")
-    } else {
-      // placera spelaren på den nya platsen
-      console.log('player'+slotIndex);
-      gamesRef.child(gameid).child('player'+slotIndex).set(this.state.uid);
-      // ta bort spelaren från alla andra platser.
-      for(var g in this.state.openGames){
-        if(this.state.openGames[g].player1 === this.state.uid){
-          gamesRef.child(gameid).child('player1').set("");
-          //this.state.openGames[g].player1 = "";
-        } else if(this.state.openGames[g].player2 === this.state.uid){
-          gamesRef.child(gameid).child('player2').set("");
-          //this.state.openGames[g].player2 = "";
-        } else if(this.state.openGames[g].player3 === this.state.uid){
-          gamesRef.child(gameid).child('player3').set("");
-          //this.state.openGames[g].player3 = "";
-        } else if(this.state.openGames[g].player4 === this.state.uid){
-          gamesRef.child(gameid).child('player4').set("");
-          //this.state.openGames[g].player4 = "";
-        }
-        // Om man tömt ett game ska det raderas.
-        if(gamesRef.child(gameid).child('player1') == ""
-          && gamesRef.child(gameid).child('player2') == ""
-          && gamesRef.child(gameid).child('player3') == ""
-          && gamesRef.child(gameid).child('player4') == ""){
-            console.log("raderar");
-            gamesRef.child(gameid).remove();
-        }
-      }
-    }
-    this.forceUpdate();
+    });
+
   }
 
   // Ett öppet game bör nog göras om till en egen component
