@@ -5,7 +5,7 @@ var authData;
 var users
 var loggedinuserRef;
 var usersRef = root.child('users');
-var gamesRef = root.child('games');
+var openGamesRef = root.child('opengames');
 
 class Lobby extends React.Component{
   constructor(props){
@@ -14,6 +14,7 @@ class Lobby extends React.Component{
     loggedinuserRef = root.child('users').child(authData.uid);
     this.state = {uid: '', username: '', userTotalScore: 0, openGames: [], currentTable: ''};
   }
+
 
   componentDidMount(){
     var self = this;
@@ -26,24 +27,20 @@ class Lobby extends React.Component{
         newState.userTotalScore = userData.totalscore;
         self.setState(newState);
     });
-
-    gamesRef.on('value', function(snapshot){
+    openGamesRef.on('value', function(snapshot){
       // radera alla games där det inte sitter någon
       var gamesToRemove = [];
       snapshot.forEach(game => {
-
+        // Hoppa över det spelarens currentTable
         if(game.val().gameid != self.state.currentTable){
           if(game.val().player1 === self.state.uid){
-            gamesRef.child(game.val().gameid).child('player1').set('');
+            openGamesRef.child(game.val().gameid).child('player1').set('');
           } else if(game.val().player2 === self.state.uid){
-            gamesRef.child(game.val().gameid).child('player2').set('');
-
+            openGamesRef.child(game.val().gameid).child('player2').set('');
           } else if(game.val().player3 === self.state.uid){
-            gamesRef.child(game.val().gameid).child('player3').set('');
-
+            openGamesRef.child(game.val().gameid).child('player3').set('');
           } else if(game.val().player4 === self.state.uid){
-            gamesRef.child(game.val().gameid).child('player4').set('');
-
+            openGamesRef.child(game.val().gameid).child('player4').set('');
           }
         }
         if(game.val().player1 == ""
@@ -53,36 +50,38 @@ class Lobby extends React.Component{
             gamesToRemove.push(game.key());
         }
       });
+      
       for(var index in gamesToRemove){
-        gamesRef.child(gamesToRemove[index]).remove();
+        openGamesRef.child(gamesToRemove[index]).remove();
       }
     });
-
-
-  gamesRef.on('value', function(snapshot){
-    const newGames = [];
-    var oldGames = snapshot.val();
-    for(var i in oldGames){
-      newGames.push(oldGames[i]);
-    }
-    var newState = self.state;
-    newState.openGames = newGames;
-    self.setState(newState);
-  });
+    openGamesRef.on('value', function(snapshot){
+      const newGames = [];
+      var oldGames = snapshot.val();
+      for(var i in oldGames){
+        newGames.push(oldGames[i]);
+      }
+      var newState = self.state;
+      newState.openGames = newGames;
+      self.setState(newState);
+    });
   }
 
+  // Koppla loss alla callbacks
   componentWillUnmount(){
     root.off();
-    gamesRef.off();
-    loggedinuserRef.off();    
+    openGamesRef.off();
+    openGamesRef.off();
+    loggedinuserRef.off();
   }
 
+  // Lägg till ett nytt game med usern på plats1
   newGameButtonClicked(){
     var self = this;
-    var newGameRef = gamesRef.push();
+    var newGameRef = openGamesRef.push();
     var newGameKey = newGameRef.key();
     loggedinuserRef.child('currenttable').set(newGameKey);
-    gamesRef.child(newGameKey).set({
+    openGamesRef.child(newGameKey).set({
       "gameid": newGameKey,
       "player1": this.state.uid,
       "player2": "",
@@ -91,9 +90,10 @@ class Lobby extends React.Component{
     });
   }
 
+  // Sätt playern på vald plats om hen inte redan sitter på bordet
   takeSlotButtonClick(gameid, slotIndex){
     var self = this;
-    gamesRef.child(gameid).once('value', function(callback){
+    openGamesRef.child(gameid).once('value', function(callback){
       if(callback.val().player1 == self.state.uid
         || callback.val().player2 == self.state.uid
         || callback.val().player3 == self.state.uid
@@ -101,7 +101,7 @@ class Lobby extends React.Component{
           console.log('Du sitter redan på detta bord!')
       } else {
         loggedinuserRef.child('currenttable').set(gameid);
-        gamesRef.child(gameid).child('player'+slotIndex).set(self.state.uid);
+        openGamesRef.child(gameid).child('player'+slotIndex).set(self.state.uid);
       }
     });
   }
