@@ -1,4 +1,5 @@
 import React from 'react';
+import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 
 var root = new Firebase("https://plump.firebaseio.com");
 var authData;
@@ -50,7 +51,7 @@ class Lobby extends React.Component{
             gamesToRemove.push(game.key());
         }
       });
-      
+
       for(var index in gamesToRemove){
         openGamesRef.child(gamesToRemove[index]).remove();
       }
@@ -64,6 +65,22 @@ class Lobby extends React.Component{
       var newState = self.state;
       newState.openGames = newGames;
       self.setState(newState);
+    });
+
+    // kolla om gamet är fullt nu
+    openGamesRef.on('value', function(snapshot){
+      snapshot.forEach(game => {
+        // Det enda intressanta bordet
+        if(game.val().gameid == self.state.currentTable){
+          if(game.val().player1 != ""
+            && game.val().player2 != ""
+            && game.val().player3 != ""
+            && game.val().player4 != ""){
+              // Bordet är fullt, alltså ska man redirectas till själva spelet.
+              browserHistory.push('/game');
+          }
+        }
+      });
     });
   }
 
@@ -89,6 +106,7 @@ class Lobby extends React.Component{
       "player4": ""
     });
   }
+
 
   // Sätt playern på vald plats om hen inte redan sitter på bordet
   takeSlotButtonClick(gameid, slotIndex){
