@@ -12,7 +12,6 @@ class Lobby extends React.Component{
     super(props);
     authData = root.getAuth();
     loggedinuserRef = root.child('users').child(authData.uid);
-    // lägg till i state vilket bord usern sist satte sig på. Radera alla andra.
     this.state = {uid: '', username: '', userTotalScore: 0, openGames: [], currentTable: ''};
   }
 
@@ -32,8 +31,7 @@ class Lobby extends React.Component{
       // radera alla games där det inte sitter någon
       var gamesToRemove = [];
       snapshot.forEach(game => {
-        // HÄR MÅSTE JAG GÖRA NÅGOT
-        console.log(game.val());
+
         if(game.val().gameid != self.state.currentTable){
           if(game.val().player1 === self.state.uid){
             gamesRef.child(game.val().gameid).child('player1').set('');
@@ -48,7 +46,6 @@ class Lobby extends React.Component{
 
           }
         }
-
         if(game.val().player1 == ""
           && game.val().player2 == ""
           && game.val().player3 == ""
@@ -77,8 +74,7 @@ class Lobby extends React.Component{
   componentWillUnmount(){
     root.off();
     gamesRef.off();
-    loggedinuserRef.off();
-    loggedinuserRef.off();
+    loggedinuserRef.off();    
   }
 
   newGameButtonClicked(){
@@ -93,8 +89,6 @@ class Lobby extends React.Component{
       "player3": "",
       "player4": ""
     });
-
-    console.log(newGameKey);
   }
 
   takeSlotButtonClick(gameid, slotIndex){
@@ -110,7 +104,6 @@ class Lobby extends React.Component{
         gamesRef.child(gameid).child('player'+slotIndex).set(self.state.uid);
       }
     });
-
   }
 
   // Ett öppet game bör nog göras om till en egen component
