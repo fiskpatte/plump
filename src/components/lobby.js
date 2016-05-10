@@ -16,7 +16,6 @@ class Lobby extends React.Component{
     this.state = {uid: '', username: '', userTotalScore: 0, openGames: [], currentTable: ''};
   }
 
-
   componentDidMount(){
     var self = this;
     loggedinuserRef.on("value", function(snapshot){
@@ -77,12 +76,31 @@ class Lobby extends React.Component{
             && game.val().player3 != ""
             && game.val().player4 != ""){
               // Bordet är fullt, alltså ska man redirectas till själva spelet.
+              // player1 blir host och skapar det nya spelet.
+              if(game.val().player1 == self.state.uid){
+                root.child('gamesinprogress').push({
+                  "players" : {
+                     "player1" : {
+                       "uid": game.val().player1,
+                       "name": "pontus",
+                       "host": true
+                    },
+                     "player2" : {
+                        "uid": game.val().player2,
+                        "name": "pontus",
+                        "host": true
+                    }
+                  },
+                  "currenthand": "10"
+                });
+              }
               browserHistory.push('/game');
+            }
           }
-        }
+        });
       });
-    });
-  }
+    }
+
 
   // Koppla loss alla callbacks
   componentWillUnmount(){
@@ -120,6 +138,7 @@ class Lobby extends React.Component{
       } else {
         loggedinuserRef.child('currenttable').set(gameid);
         openGamesRef.child(gameid).child('player'+slotIndex).set(self.state.uid);
+
       }
     });
   }
