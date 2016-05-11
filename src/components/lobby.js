@@ -3,7 +3,7 @@ import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 
 var root = new Firebase("https://plump.firebaseio.com");
 var authData;
-var users
+var users;
 var loggedinuserRef;
 var usersRef = root.child('users');
 var openGamesRef = root.child('opengames');
@@ -78,7 +78,7 @@ class Lobby extends React.Component{
               // Bordet är fullt, alltså ska man redirectas till själva spelet.
               // player1 blir host och skapar det nya spelet.
               if(game.val().player1 == self.state.uid){
-                root.child('gamesInProgress').push({
+                root.child('gamesInProgress').child(game.val().gameid).set({
                   "players" : {
                      "player1" : {
                         "uid": game.val().player1,
