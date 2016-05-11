@@ -78,22 +78,31 @@ class Lobby extends React.Component{
               // Bordet är fullt, alltså ska man redirectas till själva spelet.
               // player1 blir host och skapar det nya spelet.
               if(game.val().player1 == self.state.uid){
-                root.child('gamesinprogress').push({
+                root.child('gamesInProgress').push({
                   "players" : {
                      "player1" : {
-                       "uid": game.val().player1,
-                       "name": "pontus",
-                       "host": true
-                    },
+                        "uid": game.val().player1,
+                        "host": true
+                     },
                      "player2" : {
                         "uid": game.val().player2,
-                        "name": "pontus",
-                        "host": true
-                    }
+                        "host": false
+                      },
+                      "player3" : {
+                        "uid": game.val().player3,
+                        "host": false
+                      },
+                        "player4" : {
+                          "uid": game.val().player2,
+                          "host": false
+                      }
                   },
-                  "currenthand": "10"
+                  "currentHand": 10,
+                  "currentDealerNumber": 1,
+                  "host": game.val().player1
                 });
               }
+              openGamesRef.child(self.state.currentTable).remove();
               browserHistory.push('/game');
             }
           }
