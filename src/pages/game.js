@@ -31,7 +31,7 @@ class Game extends React.Component {
     loggedinuserRef = usersRef.child(authData.uid);
     this.state = {uid: '', currentTable : '', currentRound : 10, deck : sortedDeck};
     this.dealNewHand = this.dealNewHand.bind(this);
-    this.getCardsForRound = this.getCardsForRound.bind(this);
+    this.getCardsForRound = this.getCardsForRound.bind(this, this.state.currentRound);
     this.shuffle = this.shuffle.bind(this);
   }
 
@@ -56,17 +56,14 @@ class Game extends React.Component {
   }
 
   dealNewHand(){
-    console.log("this.state.currentRound: " + this.state.currentRound);
     var allCardsForThisRound = this.getCardsForRound(this.state.currentRound);
-    console.log(allCardsForThisRound);
+    console.log("alla kort: "+allCardsForThisRound);
   }
 
   getCardsForRound(cardsPerPerson){
     var shuffledDeck = this.shuffle(sortedDeck);
     var cardsForThisRound = [];
-    console.log("cardsPerPerson: " + cardsPerPerson);
     for(var i = 0; i < cardsPerPerson * 4; i++){
-      console.log("pushing " + shuffledDeck[i]);
       cardsForThisRound.push(shuffledDeck[i]);
     }
     return cardsForThisRound;
