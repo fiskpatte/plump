@@ -98,7 +98,7 @@ class Lobby extends React.Component{
                       }
                   },
                   "currentHand": 10,
-                  "currentDealerNumber": 1,
+                  "currentDealer": 1,
                   "host": game.val().player1
                 });
               }
