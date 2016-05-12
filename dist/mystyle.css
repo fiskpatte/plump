@@ -1,3 +1,7 @@
 .openGame{
   border: solid 1px black;
 }
+
+.disabled {
+  disabled : true;
+}

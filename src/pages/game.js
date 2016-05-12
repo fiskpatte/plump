@@ -50,7 +50,7 @@ class Game extends React.Component {
     const cards = [];
     this.state = {uid: '', currentTable : '', currentRound : 10, deck : sortedDeck,
       player1cards : "", player2cards : "", player3cards : "", player4cards : "",
-      currentDealer: 3, myCards : cards, myPlayerNumber : 0};
+      currentDealer: 3, myCards : cards, myPlayerNumber : 0, playersTurn: 1};
     this.dealNewHand = this.dealNewHand.bind(this, this.state.currentRound);
     this.getCardsForRound = this.getCardsForRound.bind(this, this.state.currentRound);
     this.shuffle = this.shuffle.bind(this);
@@ -72,6 +72,7 @@ class Game extends React.Component {
         //currentGameRef = gamesInProgressRef.child(userData.currenttable);
         newState.currentRound = gameData.currentRound;
         newState.currentDealer = gameData.currentDealer;
+        newState.playersTurn = gameData.playersTurn;
         newState.player1cards = gameData.players.player1.currentCards;
         newState.player2cards = gameData.players.player2.currentCards;
         newState.player3cards = gameData.players.player3.currentCards;
@@ -98,7 +99,7 @@ class Game extends React.Component {
         tempCardArray = tempCardArray.sort(function(left, right) {
                           return ranks[right] - ranks[left]; // descending order
                         });
-        newState.myCards = tempCardArray;
+        newState.myCards = tempCardArray;        
         self.setState(newState);
       });
     });
@@ -106,7 +107,6 @@ class Game extends React.Component {
 
   // det sista som händer är att man ändrar dealer och cards, annars skiter det sig med det asynchrona.
   dealNewHand(cardsCount){
-
     //console.log(newDealer);
     var allCardsForThisRound = this.getCardsForRound();
     // ge varje spelare sina kort.
@@ -119,14 +119,17 @@ class Game extends React.Component {
     }
 
 
-    // spela en hand
-    // for(var cardNo = 0 ; cardNo < cardsCount ; cardNo++){
-    //   for(var playerNo = 1; playerNo <= 4; playerNo){
-    //
-    //   }
-    // }
+
+    //spela en hand
+
     // newDealer = (this.state.currentDealer % 4) + 1;
     // gamesInProgressRef.child(this.state.currentTable).child("currentDealer").set(newDealer);
+    // var nextRound = this.state.currentRound - 1;
+    // if(this.state.currentRound >= 2){
+    //  gamesInProgressRef.child(this.state.currentTable).child('currentRound').set(nextRound);
+    // } else {
+    //  endTheGame();
+    // }
   }
 
   getCardsForRound(cardsPerPerson){
@@ -156,25 +159,24 @@ class Game extends React.Component {
   }
 
   cardClicked(index, card){
-    console.log("index: " + index + " card: "+ card);
-    // ta ut mina currentCards. pilla ut detta kort. uppdatera db. sen ska allt vara fixat.
-    var updatedCards = "";
-    if(this.state.myPlayerNumber == 1){
-      updatedCards = this.state.player1cards;
-    } else if(this.state.myPlayerNumber == 2){
-      updatedCards = this.state.player2cards;
-    } else if(this.state.myPlayerNumber == 3){
-      updatedCards = this.state.player3cards;
-    } else if(this.state.myPlayerNumber == 4){
-      updatedCards = this.state.player4cards;
-    } else {
-      console.log("error returning currentCards");
+    if(this.state.playersTurn == this.state.myPlayerNumber){
+      console.log("index: " + index + " card: "+ card);
+      // ta ut mina currentCards. pilla ut detta kort. uppdatera db. sen ska allt vara fixat.
+      var updatedCards = "";
+      if(this.state.myPlayerNumber == 1){
+        updatedCards = this.state.player1cards;
+      } else if(this.state.myPlayerNumber == 2){
+        updatedCards = this.state.player2cards;
+      } else if(this.state.myPlayerNumber == 3){
+        updatedCards = this.state.player3cards;
+      } else if(this.state.myPlayerNumber == 4){
+        updatedCards = this.state.player4cards;
+      } else {
+        console.log("error returning currentCards");
+      }
+      updatedCards= updatedCards.replace(card, '');
+      gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('currentCards').set(updatedCards);
     }
-
-    updatedCards= updatedCards.replace(card, '');
-
-  gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('currentCards').set(updatedCards);
-
   }
 
   render() {
@@ -189,7 +191,7 @@ class Game extends React.Component {
         <p>Dealer: {this.state.currentDealer}</p>
         <p>Mina kort: </p>
         {this.state.myCards.map((card, index) => (
-          <img key={index} src={"./images/cards/minifiedcards/"+card+".png"} onClick={this.cardClicked.bind(this, index, card)}/>
+          <img key={index} className="cardImage" src={"./images/cards/minifiedcards/"+card+".png"} onClick={this.cardClicked.bind(this, index, card)}/>
         ))}
       </div>
     )
