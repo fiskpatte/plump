@@ -44,13 +44,14 @@ class Game extends React.Component {
     "qc" : 11, "qh" : 24, "qs" : 37, "qd" : 50,
     "kc" : 12, "kh" : 25, "ks" : 38, "kd" : 51
   };
-
     authData = root.getAuth();
     loggedinuserRef = usersRef.child(authData.uid);
     const cards = [];
     this.state = {uid: '', currentTable : '', currentRound : 10, deck : sortedDeck,
       player1cards : "", player2cards : "", player3cards : "", player4cards : "",
-      currentDealer: 3, myCards : cards, myPlayerNumber : 0, playersTurn: 1};
+      player1bid : 0, player2bid : 0, player3bid : 0, player4bid : 0,
+      currentDealer: 3, myCards : cards, myPlayerNumber : 0, playersTurn: 1,
+      highestBidder: 1, biddingMode : true, };
     this.dealNewHand = this.dealNewHand.bind(this, this.state.currentRound);
     this.getCardsForRound = this.getCardsForRound.bind(this, this.state.currentRound);
     this.shuffle = this.shuffle.bind(this);
@@ -70,13 +71,19 @@ class Game extends React.Component {
         var gameData = childsnapshot.val();
         var newState = self.state;
         //currentGameRef = gamesInProgressRef.child(userData.currenttable);
-        newState.currentRound = gameData.currentRound;
-        newState.currentDealer = gameData.currentDealer;
-        newState.playersTurn = gameData.playersTurn;
-        newState.player1cards = gameData.players.player1.currentCards;
-        newState.player2cards = gameData.players.player2.currentCards;
-        newState.player3cards = gameData.players.player3.currentCards;
-        newState.player4cards = gameData.players.player4.currentCards;
+        newState.currentRound   = gameData.currentRound;
+        newState.currentDealer  = gameData.currentDealer;
+        newState.playersTurn    = gameData.playersTurn;
+        newState.player1cards   = gameData.players.player1.currentCards;
+        newState.player2cards   = gameData.players.player2.currentCards;
+        newState.player3cards   = gameData.players.player3.currentCards;
+        newState.player4cards   = gameData.players.player4.currentCards;
+        newState.player1bid     = gameData.players.player1.currentBid;
+        newState.player2bid     = gameData.players.player2.currentBid;
+        newState.player3bid     = gameData.players.player3.currentBid;
+        newState.player4bid     = gameData.players.player4.currentBid;
+        newState.highestBidder  = gameData.highestBidder;
+        newState.biddingMode    = gameData.biddingMode;
 
         var tempCards = "";
         var tempCardArray = [];
@@ -99,10 +106,15 @@ class Game extends React.Component {
         tempCardArray = tempCardArray.sort(function(left, right) {
                           return ranks[right] - ranks[left]; // descending order
                         });
-        newState.myCards = tempCardArray;        
+        newState.myCards = tempCardArray;
         self.setState(newState);
       });
     });
+    // dealNewHand();
+    // Detta sätter igång spelet.
+    // Ska bara ske hos hosten.
+    // Alla får göra en check, se om hosten är online. Om inte: sätt nästa spelare som är online till host osv.
+    // Detta kommer definitivt bli meckigt men lösbart.
   }
 
   // det sista som händer är att man ändrar dealer och cards, annars skiter det sig med det asynchrona.
@@ -119,11 +131,14 @@ class Game extends React.Component {
     }
 
 
+    // BUDGIVNING
+    // Ha en div som innehåller budgivningsmekanismen. Visa den när spelet är i budläge.
+    // Sätt en timer som timar ut efter ~20 sekunder. Har man inte valt tills dess så
+    // autoväljs något åt en.
 
-    //spela en hand
 
-    // newDealer = (this.state.currentDealer % 4) + 1;
-    // gamesInProgressRef.child(this.state.currentTable).child("currentDealer").set(newDealer);
+
+
     // var nextRound = this.state.currentRound - 1;
     // if(this.state.currentRound >= 2){
     //  gamesInProgressRef.child(this.state.currentTable).child('currentRound').set(nextRound);
@@ -158,6 +173,7 @@ class Game extends React.Component {
 
   }
 
+  // Här tar jag bort kortet man klickade på och uppdaterar db.
   cardClicked(index, card){
     if(this.state.playersTurn == this.state.myPlayerNumber){
       console.log("index: " + index + " card: "+ card);
@@ -176,7 +192,21 @@ class Game extends React.Component {
       }
       updatedCards= updatedCards.replace(card, '');
       gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('currentCards').set(updatedCards);
+
+      // Nästa spelares tur.
+      var nextPlayer = (this.state.playersTurn + 1) % 4;
+      gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
+      if(nextPlayer == this.state.highestBidder){
+        // given slut, dags att dela ut poäng
+      } else {
+        gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
+      }
+
     }
+  }
+
+  bidButtonClicked(){
+    console.log("bud lagt");
   }
 
   render() {
@@ -189,6 +219,10 @@ class Game extends React.Component {
         <p>Spelare3s kort: {this.state.player3cards}</p>
         <p>Spelare4s kort: {this.state.player4cards}</p>
         <p>Dealer: {this.state.currentDealer}</p>
+        <div className="biddingBox">
+          <input type="text" placeholder="Lägg ett bud" />
+          <button onClick={this.bidButtonClicked.bind(this)}>Ok</button>
+        </div>
         <p>Mina kort: </p>
         {this.state.myCards.map((card, index) => (
           <img key={index} className="cardImage" src={"./images/cards/minifiedcards/"+card+".png"} onClick={this.cardClicked.bind(this, index, card)}/>
