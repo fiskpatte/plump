@@ -82,19 +82,23 @@ class Lobby extends React.Component{
                   "players" : {
                      "player1" : {
                         "uid": game.val().player1,
-                        "host": true
+                        "host": true,
+                        "currentBid": 0
                      },
                      "player2" : {
                         "uid": game.val().player2,
-                        "host": false
+                        "host": false,
+                        "currentBid": 0
                       },
                       "player3" : {
                         "uid": game.val().player3,
-                        "host": false
+                        "host": false,
+                        "currentBid": 0
                       },
                         "player4" : {
                           "uid": game.val().player2,
-                          "host": false
+                          "host": false,
+                          "currentBid": 0
                       }
                   },
                   "currentHand": 10,

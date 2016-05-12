@@ -55,6 +55,7 @@ class Game extends React.Component {
     this.dealNewHand = this.dealNewHand.bind(this, this.state.currentRound);
     this.getCardsForRound = this.getCardsForRound.bind(this, this.state.currentRound);
     this.shuffle = this.shuffle.bind(this);
+    this.bidButtonClicked = this.bidButtonClicked.bind(this, this.state.currentRound);
   }
 
   componentDidMount(){
@@ -205,8 +206,16 @@ class Game extends React.Component {
     }
   }
 
-  bidButtonClicked(){
-    console.log("bud lagt");
+
+  bidButtonClicked(currentRound){
+    var bid = $("#bidInput").val();
+    console.log(currentRound);
+    if(isNaN(bid)  || bid < 0 || bid > currentRound){
+      console.log("Felaktigt bud: "+ bid);
+    } else{
+      console.log("sparar bud...");
+      gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('currentBid').set(bid);
+    }
   }
 
   render() {
@@ -220,7 +229,7 @@ class Game extends React.Component {
         <p>Spelare4s kort: {this.state.player4cards}</p>
         <p>Dealer: {this.state.currentDealer}</p>
         <div className="biddingBox">
-          <input type="text" placeholder="Lägg ett bud" />
+          <input id="bidInput" type="text" placeholder="Lägg ett bud" />
           <button onClick={this.bidButtonClicked.bind(this)}>Ok</button>
         </div>
         <p>Mina kort: </p>
