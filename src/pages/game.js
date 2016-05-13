@@ -9,7 +9,6 @@ var usersRef = root.child('users');
 var gamesInProgressRef = root.child('gamesInProgress');
 var sortedDeck;
 var ranks;
-var valueRanks;
 
 class Game extends React.Component {
 
@@ -45,22 +44,6 @@ class Game extends React.Component {
     "qc" : 50, "qh" : 37, "qs" : 24, "qd" : 11,
     "kc" : 51, "kh" : 38, "ks" : 25, "kd" : 12
     };
-    valueRanks = {
-      "a" : 13,
-      "k" : 12,
-      "q" : 11,
-      "j" : 10,
-      "10" : 9,
-      "9" : 8,
-      "8" : 7,
-      "7" : 6,
-      "6" : 5,
-      "5" : 4,
-      "4" : 3,
-      "3" : 2,
-      "2" : 1,
-    }
-
     authData = root.getAuth();
     loggedinuserRef = usersRef.child(authData.uid);
     const cards = [];
@@ -308,7 +291,7 @@ class Game extends React.Component {
           }
           console.log('Setting new trick count for player'+winnerOfTrick+". New value: " + newTrickCount + ".");
           gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
-          
+
           gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
         }
         var nextPlayer = (this.state.playersTurn % 4) + 1;
