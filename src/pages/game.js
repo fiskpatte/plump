@@ -30,19 +30,19 @@ class Game extends React.Component {
      "kc", "kh", "ks", "kd"
    ];
    ranks = {
-    "ac" : 13, "ah" : 26, "as" : 39, "ad" : 52,
-    "2c" : 1, "2h" : 14, "2s" : 27, "2d" : 40,
-    "3c" : 2, "3h" : 15, "3s" : 28, "3d" : 41,
-    "4c" : 3, "4h" : 16, "4s" : 29, "4d" : 42,
-    "5c" : 4, "5h" : 17, "5s" : 30, "5d" : 43,
-    "6c" : 5, "6h" : 18, "6s" : 31, "6d" : 44,
-    "7c" : 6, "7h" : 19, "7s" : 32, "7d" : 45,
-    "8c" : 7, "8h" : 20, "8s" : 33, "8d" : 46,
-    "9c" : 8, "9h" : 21, "9s" : 34, "9d" : 47,
-    "tc" : 9, "th" : 22, "ts" : 35, "td" : 48,
-    "jc" : 10, "jh" : 23, "js" : 36, "jd" : 49,
-    "qc" : 11, "qh" : 24, "qs" : 37, "qd" : 50,
-    "kc" : 12, "kh" : 25, "ks" : 38, "kd" : 51
+    "ac" : 52, "ah" : 39, "as" : 26, "ad" : 13,
+    "2c" : 40, "2h" : 27, "2s" : 14, "2d" : 1,
+    "3c" : 41, "3h" : 28, "3s" : 15, "3d" : 2,
+    "4c" : 42, "4h" : 29, "4s" : 16, "4d" : 3,
+    "5c" : 43, "5h" : 30, "5s" : 17, "5d" : 4,
+    "6c" : 44, "6h" : 31, "6s" : 18, "6d" : 5,
+    "7c" : 45, "7h" : 32, "7s" : 19, "7d" : 6,
+    "8c" : 46, "8h" : 33, "8s" : 20, "8d" : 7,
+    "9c" : 47, "9h" : 34, "9s" : 21, "9d" : 8,
+    "tc" : 48, "th" : 35, "ts" : 22, "td" : 9,
+    "jc" : 49, "jh" : 36, "js" : 23, "jd" : 10,
+    "qc" : 50, "qh" : 37, "qs" : 24, "qd" : 11,
+    "kc" : 51, "kh" : 38, "ks" : 25, "kd" : 12
   };
     authData = root.getAuth();
     loggedinuserRef = usersRef.child(authData.uid);
@@ -50,12 +50,16 @@ class Game extends React.Component {
     this.state = {uid: '', currentTable : '', currentRound : 10, deck : sortedDeck,
       player1cards : "", player2cards : "", player3cards : "", player4cards : "",
       player1bid : 0, player2bid : 0, player3bid : 0, player4bid : 0,
-      currentDealer: 3, myCards : cards, myPlayerNumber : 0, playersTurn: 1,
-      highestBidder: 1, biddingMode : true, };
+      player1cardPlayed: '', player2cardPlayed: '', player3cardPlayed: '', player4cardPlayed: '',
+      currentDealer: 1, myCards : cards, myPlayerNumber : 1, playersTurn: 1,
+      highestBid: 0, highestBidder: 1, biddingMode : true, currentBidder : 1,
+      currentSuit: ''};
     this.dealNewHand = this.dealNewHand.bind(this, this.state.currentRound);
     this.getCardsForRound = this.getCardsForRound.bind(this, this.state.currentRound);
     this.shuffle = this.shuffle.bind(this);
     this.bidButtonClicked = this.bidButtonClicked.bind(this, this.state.currentRound);
+    this.bidSum = this.bidSum.bind(this);
+    this.suitIsInMyCards = this.suitIsInMyCards.bind(this);
   }
 
   componentDidMount(){
@@ -66,13 +70,12 @@ class Game extends React.Component {
       newState.uid = snapshot.key();
       newState.currentTable = userData.currenttable;
       newState.username = userData.displayname;
-      newState.userTotalScore = userData.totalscore;
       self.setState(newState);
       gamesInProgressRef.child(userData.currenttable).on("value", function(childsnapshot){
         var gameData = childsnapshot.val();
         var newState = self.state;
-        //currentGameRef = gamesInProgressRef.child(userData.currenttable);
-        newState.currentRound   = gameData.currentRound;
+        newState.currentBidder  = gameData.currentBidder;
+        newState.currentRound   = gameData.currentHand;
         newState.currentDealer  = gameData.currentDealer;
         newState.playersTurn    = gameData.playersTurn;
         newState.player1cards   = gameData.players.player1.currentCards;
@@ -83,8 +86,13 @@ class Game extends React.Component {
         newState.player2bid     = gameData.players.player2.currentBid;
         newState.player3bid     = gameData.players.player3.currentBid;
         newState.player4bid     = gameData.players.player4.currentBid;
+        newState.player1cardPlayed = gameData.players.player1.cardPlayed;
+        newState.player2cardPlayed = gameData.players.player2.cardPlayed;
+        newState.player3cardPlayed = gameData.players.player3.cardPlayed;
+        newState.player4cardPlayed = gameData.players.player4.cardPlayed;
         newState.highestBidder  = gameData.highestBidder;
         newState.biddingMode    = gameData.biddingMode;
+        newState.currentSuit    = gameData.currentSuit;
 
         var tempCards = "";
         var tempCardArray = [];
@@ -130,15 +138,20 @@ class Game extends React.Component {
       }
       gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (i+1)).child('currentCards').set(cardsAsString);
     }
+    // Skifta dealern ett steg. Först att buda är knappen + 1
+    var newDealer = (this.state.currentDealer % 4 ) + 1;
+    var newBidder = (newDealer % 4) + 1;
+    console.log("newDealer: "+ newDealer);
+    gamesInProgressRef.child(this.state.currentTable).child('currentDealer').set(newDealer);
+    gamesInProgressRef.child(this.state.currentTable).child('currentBidder').set(newBidder);
+    // Först ska man buda.
+    gamesInProgressRef.child(this.state.currentTable).child('biddingMode').set(true);
 
 
     // BUDGIVNING
     // Ha en div som innehåller budgivningsmekanismen. Visa den när spelet är i budläge.
     // Sätt en timer som timar ut efter ~20 sekunder. Har man inte valt tills dess så
     // autoväljs något åt en.
-
-
-
 
     // var nextRound = this.state.currentRound - 1;
     // if(this.state.currentRound >= 2){
@@ -174,47 +187,117 @@ class Game extends React.Component {
 
   }
 
-  // Här tar jag bort kortet man klickade på och uppdaterar db.
-  cardClicked(index, card){
-    if(this.state.playersTurn == this.state.myPlayerNumber){
-      console.log("index: " + index + " card: "+ card);
-      // ta ut mina currentCards. pilla ut detta kort. uppdatera db. sen ska allt vara fixat.
-      var updatedCards = "";
-      if(this.state.myPlayerNumber == 1){
-        updatedCards = this.state.player1cards;
-      } else if(this.state.myPlayerNumber == 2){
-        updatedCards = this.state.player2cards;
-      } else if(this.state.myPlayerNumber == 3){
-        updatedCards = this.state.player3cards;
-      } else if(this.state.myPlayerNumber == 4){
-        updatedCards = this.state.player4cards;
-      } else {
-        console.log("error returning currentCards");
+  suitIsInMyCards(suit, cards){
+    var butWasItReallyThere = false;
+    for(var i = 0; i < cards.length; i += 2){
+      if(suit == cards[i + 1]){
+        butWasItReallyThere = true;
       }
-      updatedCards= updatedCards.replace(card, '');
-      gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('currentCards').set(updatedCards);
-
-      // Nästa spelares tur.
-      var nextPlayer = (this.state.playersTurn + 1) % 4;
-      gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
-      if(nextPlayer == this.state.highestBidder){
-        // given slut, dags att dela ut poäng
-      } else {
-        gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
-      }
-
     }
+    return butWasItReallyThere;
+  }
+
+  // Här tar jag bort kortet man klickade på och uppdaterar db.
+  cardClicked(card){
+    if(this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false){
+      var validPlay = false;
+      var curSuit = this.state.currentSuit;
+      var myCards = "";
+      if(this.state.myPlayerNumber == 1){
+        myCards = this.state.player1cards;
+      } else if(this.state.myPlayerNumber == 2){
+        myCards = this.state.player2cards;
+      } else if(this.state.myPlayerNumber == 3){
+        myCards = this.state.player3cards;
+      } else if(this.state.myPlayerNumber == 4){
+        myCards = this.state.player4cards;
+      } else {
+        console.log("myPlayerNumber has an invalid value: "+ this.state.myPlayerNumber);
+      }
+
+      var firstOutToPlay = false;
+      // kolla om man fick spela det kortet.
+      if(curSuit == ""){
+        // Detta betyder att man är först ut och alltså får lägga vad som helst.
+        validPlay = true;
+        firstOutToPlay = true;
+      } else if(curSuit == card[1]){
+        // kortet är av samma färg som det som spelades först.
+        validPlay = true;
+      } else if(!this.suitIsInMyCards(curSuit, myCards)){
+        // Vi har inget sådant kort och får spela vad som helst
+        validPlay = true;
+      }
+
+      // gör alla uppdateringar
+      if(validPlay){
+        myCards= updatedCards.replace(card, '');
+        gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('currentCards').set(myCards);
+        gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('cardPlayed').set(card);
+        if(firstOutToPlay){
+          gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set(card[1]);
+        }
+
+        // Nästa spelares tur.
+        var nextPlayer = (this.state.playersTurn % 4) + 1;
+        gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
+        if(nextPlayer == this.state.highestBidder){
+          // Highest bidder började spelet, det betyder att alla nu lagt ett varsiitt kort.
+          // nollställa bud,
+          //
+        } else {
+          gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
+        }
+      }
+    }
+  }
+
+  bidSum(){
+    var tempSum = 0;
+    tempSum += this.state.player1bid;
+    tempSum += this.state.player2bid;
+    tempSum += this.state.player3bid;
+    tempSum += this.state.player4bid;
+    console.log(tempSum);
+    return  tempSum;
   }
 
 
   bidButtonClicked(currentRound){
     var bid = $("#bidInput").val();
-    console.log(currentRound);
-    if(isNaN(bid)  || bid < 0 || bid > currentRound){
-      console.log("Felaktigt bud: "+ bid);
+    bid = bid * 1;
+    if(isNaN(bid)  || bid < 0 || bid > currentRound || ((this.state.currentBidder == this.state.currentDealer) && (this.bidSum() + bid) == currentRound )){
+      console.log("Felaktigt bud. bid: "+ bid );
     } else{
       console.log("sparar bud...");
       gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('currentBid').set(bid);
+
+      // detta behävs fär att slippa async-problem
+      var highest = false;
+      // Detta bud är högst.
+      if(bid > this.state.highestBid){
+        highest = true;
+        gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(bid);
+      }
+
+      if(this.state.currentBidder == this.state.currentDealer){
+        // budgivning ska avslutas
+        console.log('sista budet.');
+        gamesInProgressRef.child(this.state.currentTable).child('biddingMode').set(false);
+        // spelarna ska kunna klicka på kort och spela. Man måste sätta vem som börjar.
+        // highest bidder börjar...
+        // Återigen, hade inte highest-variabeln använts så hade man kanske missat att man nyss uppdaterat highestBidder
+        if(highest){
+          gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.myPlayerNumber);
+        } else {
+          gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.highestBidder);
+        }
+
+      } else {
+        // nästa budare ska sättas
+        var newBidder = (this.state.currentBidder % 4) + 1;
+        gamesInProgressRef.child(this.state.currentTable).child('currentBidder').set(newBidder);
+      }
     }
   }
 
@@ -222,19 +305,23 @@ class Game extends React.Component {
     return (
       <div>
         <p>THIS IS THE GAME</p>
-        <button onClick={this.debugKnapp.bind(this)}>Click me</button>
+        <button onClick={this.debugKnapp.bind(this)}>Starta spelet</button>
         <p>Spelare1s kort: {this.state.player1cards}</p>
         <p>Spelare2s kort: {this.state.player2cards}</p>
         <p>Spelare3s kort: {this.state.player3cards}</p>
         <p>Spelare4s kort: {this.state.player4cards}</p>
+        <p>biddingMode: {this.state.biddingMode ? "true" : "false"}</p>
+        <p>playersTurn: {this.state.playersTurn}</p>
         <p>Dealer: {this.state.currentDealer}</p>
+        <p>currentBidder: {this.state.currentBidder}</p>
+        <p>currentSuit: {this.state.currentSuit}</p>
         <div className="biddingBox">
           <input id="bidInput" type="text" placeholder="Lägg ett bud" />
           <button onClick={this.bidButtonClicked.bind(this)}>Ok</button>
         </div>
         <p>Mina kort: </p>
         {this.state.myCards.map((card, index) => (
-          <img key={index} className="cardImage" src={"./images/cards/minifiedcards/"+card+".png"} onClick={this.cardClicked.bind(this, index, card)}/>
+          <img key={index} className="cardImage" src={"./images/cards/minifiedcards/"+card+".png"} onClick={this.cardClicked.bind(this, card)}/>
         ))}
       </div>
     )
