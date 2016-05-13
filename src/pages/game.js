@@ -9,6 +9,7 @@ var usersRef = root.child('users');
 var gamesInProgressRef = root.child('gamesInProgress');
 var sortedDeck;
 var ranks;
+var valueRanks;
 
 class Game extends React.Component {
 
@@ -43,7 +44,23 @@ class Game extends React.Component {
     "jc" : 49, "jh" : 36, "js" : 23, "jd" : 10,
     "qc" : 50, "qh" : 37, "qs" : 24, "qd" : 11,
     "kc" : 51, "kh" : 38, "ks" : 25, "kd" : 12
-  };
+    };
+    valueRanks = {
+      "a" : 13,
+      "k" : 12,
+      "q" : 11,
+      "j" : 10,
+      "10" : 9,
+      "9" : 8,
+      "8" : 7,
+      "7" : 6,
+      "6" : 5,
+      "5" : 4,
+      "4" : 3,
+      "3" : 2,
+      "2" : 1,
+    }
+
     authData = root.getAuth();
     loggedinuserRef = usersRef.child(authData.uid);
     const cards = [];
@@ -51,6 +68,7 @@ class Game extends React.Component {
       player1cards : "", player2cards : "", player3cards : "", player4cards : "",
       player1bid : 0, player2bid : 0, player3bid : 0, player4bid : 0,
       player1cardPlayed: '', player2cardPlayed: '', player3cardPlayed: '', player4cardPlayed: '',
+      player1tricksTaken: 0, player2tricksTaken: 0, player3tricksTaken: 0, player4tricksTaken: 0,
       currentDealer: 1, myCards : cards, myPlayerNumber : 1, playersTurn: 1,
       highestBid: 0, highestBidder: 1, biddingMode : true, currentBidder : 1,
       currentSuit: ''};
@@ -60,6 +78,8 @@ class Game extends React.Component {
     this.bidButtonClicked = this.bidButtonClicked.bind(this, this.state.currentRound);
     this.bidSum = this.bidSum.bind(this);
     this.suitIsInMyCards = this.suitIsInMyCards.bind(this);
+    this.trickOver = this.trickOver.bind(this);
+    this.trickWinner = this.trickWinner.bind(this);
   }
 
   componentDidMount(){
@@ -90,6 +110,10 @@ class Game extends React.Component {
         newState.player2cardPlayed = gameData.players.player2.cardPlayed;
         newState.player3cardPlayed = gameData.players.player3.cardPlayed;
         newState.player4cardPlayed = gameData.players.player4.cardPlayed;
+        newState.player1tricksTaken = gameData.players.player1.tricksTaken;
+        newState.player2tricksTaken = gameData.players.player2.tricksTaken;
+        newState.player3tricksTaken = gameData.players.player3.tricksTaken;
+        newState.player4tricksTaken = gameData.players.player4.tricksTaken;
         newState.highestBidder  = gameData.highestBidder;
         newState.biddingMode    = gameData.biddingMode;
         newState.currentSuit    = gameData.currentSuit;
@@ -117,6 +141,7 @@ class Game extends React.Component {
                         });
         newState.myCards = tempCardArray;
         self.setState(newState);
+
       });
     });
     // dealNewHand();
@@ -125,6 +150,8 @@ class Game extends React.Component {
     // Alla får göra en check, se om hosten är online. Om inte: sätt nästa spelare som är online till host osv.
     // Detta kommer definitivt bli meckigt men lösbart.
   }
+
+
 
   // det sista som händer är att man ändrar dealer och cards, annars skiter det sig med det asynchrona.
   dealNewHand(cardsCount){
@@ -239,16 +266,160 @@ class Game extends React.Component {
         }
 
         // Nästa spelares tur.
+        var myNumber = this.state.myPlayerNumber;
+
+        if(this.trickOver(myNumber)){
+          // 4 korts har lagts, alltså börjar nästa stick
+          // sätter currentSUit till ""
+
+
+          // låt hen vara den som spelar ut nästa gång.
+          //gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
+          // gör en funktion som skickar in current suit plus allas kort
+
+          // kolla vem som fick sticket.
+          var winnerOfTrick;
+          var p1card = this.state.player1card;
+          var p2card = this.state.player2card;
+          var p3card = this.state.player3card;
+          var p4card = this.state.player4card;
+          if(this.state.myPlayerNumber == 1){
+            winnerOfTrick = this.trickWinner(suit, card, p2card, p3card, p4card);
+          } else if(this.state.myPlayerNumber == 2){
+            winnerOfTrick = this.trickWinner(suit, p1card, card, p3card, p4card);
+          } else if(this.state.myPlayerNumber == 3){
+            winnerOfTrick = this.trickWinner(suit, p1card, p2card, card, p4card);
+          } else if(this.state.myPlayerNumber == 4){
+            winnerOfTrick = this.trickWinner(suit, p1card, p2card, p3card, card);
+          }
+
+          // räkna upp den spelarens stickräknare.
+          var newTrickCount = 1;
+          if(winnerOfTrick == 1){
+            newTrickCount += this.state.player1tricksTaken;
+          } else if(winnerOfTrick == 2){
+            newTrickCount += this.state.player2tricksTaken;
+          } else if(winnerOfTrick == 3){
+            newTrickCount += this.state.player3tricksTaken;
+          } else if(winnerOfTrick == 4){
+            newTrickCount += this.state.player4tricksTaken;
+          } else {
+            console.log("Error setting new trick count: winnerOfTrick: " + winnerOfTrick);
+          }
+          console.log('Setting new trick count for player'+winnerOfTrick+". New value: " + newTrickCount + ".");
+          gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
+          
+          gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
+        }
         var nextPlayer = (this.state.playersTurn % 4) + 1;
         gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
         if(nextPlayer == this.state.highestBidder){
-          // Highest bidder började spelet, det betyder att alla nu lagt ett varsiitt kort.
-          // nollställa bud,
-          //
+            // detta är fel
         } else {
           gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
         }
       }
+    }
+  }
+
+  trickWinner(suit, player1card, player2card, player3card, player4card){
+    var check1 = player1card[1] == suit ? true : false;
+    var check2 = player2card[1] == suit ? true : false;
+    var check3 = player3card[1] == suit ? true : false;
+    var check4 = player4card[1] == suit ? true : false;
+
+    // det här suger
+    // kolla efter A
+    if(check1 && player1card[0] == 'a'){ return 1;}
+    if(check2 && player2card[0] == 'a'){ return 2;}
+    if(check3 && player3card[0] == 'a'){ return 3;}
+    if(check4 && player4card[0] == 'a'){ return 4;}
+    // kolla efter k
+    if(check1 && player1card[0] == 'k'){ return 1;}
+    if(check2 && player2card[0] == 'k'){ return 2;}
+    if(check3 && player3card[0] == 'k'){ return 3;}
+    if(check4 && player4card[0] == 'k'){ return 4;}
+    if(check1 && player1card[0] == 'q'){ return 1;}
+    if(check2 && player2card[0] == 'q'){ return 2;}
+    if(check3 && player3card[0] == 'q'){ return 3;}
+    if(check4 && player4card[0] == 'q'){ return 4;}
+    if(check1 && player1card[0] == 'j'){ return 1;}
+    if(check2 && player2card[0] == 'j'){ return 2;}
+    if(check3 && player3card[0] == 'j'){ return 3;}
+    if(check4 && player4card[0] == 'j'){ return 4;}
+    if(check1 && player1card[0] == 't'){ return 1;}
+    if(check2 && player2card[0] == 't'){ return 2;}
+    if(check3 && player3card[0] == 't'){ return 3;}
+    if(check4 && player4card[0] == 't'){ return 4;}
+    if(check1 && player1card[0] == '9'){ return 1;}
+    if(check2 && player2card[0] == '9'){ return 2;}
+    if(check3 && player3card[0] == '9'){ return 3;}
+    if(check4 && player4card[0] == '9'){ return 4;}
+    if(check1 && player1card[0] == '8'){ return 1;}
+    if(check2 && player2card[0] == '8'){ return 2;}
+    if(check3 && player3card[0] == '8'){ return 3;}
+    if(check4 && player4card[0] == '8'){ return 4;}
+    if(check1 && player1card[0] == '7'){ return 1;}
+    if(check2 && player2card[0] == '7'){ return 2;}
+    if(check3 && player3card[0] == '7'){ return 3;}
+    if(check4 && player4card[0] == '7'){ return 4;}
+    if(check1 && player1card[0] == '6'){ return 1;}
+    if(check2 && player2card[0] == '6'){ return 2;}
+    if(check3 && player3card[0] == '6'){ return 3;}
+    if(check4 && player4card[0] == '6'){ return 4;}
+    if(check1 && player1card[0] == '5'){ return 1;}
+    if(check2 && player2card[0] == '5'){ return 2;}
+    if(check3 && player3card[0] == '5'){ return 3;}
+    if(check4 && player4card[0] == '5'){ return 4;}
+    if(check1 && player1card[0] == '4'){ return 1;}
+    if(check2 && player2card[0] == '4'){ return 2;}
+    if(check3 && player3card[0] == '4'){ return 3;}
+    if(check4 && player4card[0] == '4'){ return 4;}
+    if(check1 && player1card[0] == '3'){ return 1;}
+    if(check2 && player2card[0] == '3'){ return 2;}
+    if(check3 && player3card[0] == '3'){ return 3;}
+    if(check4 && player4card[0] == '3'){ return 4;}
+    if(check1 && player1card[0] == '2'){ return 1;}
+    if(check2 && player2card[0] == '2'){ return 2;}
+    if(check3 && player3card[0] == '2'){ return 3;}
+    if(check4 && player4card[0] == '2'){ return 4;}
+  }
+
+  firstIsHigher(card1, card2){
+
+  }
+
+  trickOver(myNumber){
+    if(myNumber == 1){
+      if(this.state.player2cardPlayed != "" && this.state.player3cardPlayed != ""
+        && this.state.player4cardPlayed != ""){
+          return true;
+      } else {
+        return false;
+      }
+    } else if(myNumber == 2){
+      if(this.state.player1cardPlayed != "" && this.state.player3cardPlayed != ""
+        && this.state.player4cardPlayed != ""){
+          return true;
+      } else {
+        return false;
+      }
+    } else if(myNumber == 3){
+      if(this.state.player1cardPlayed != "" && this.state.player2cardPlayed != ""
+        && this.state.player4cardPlayed != ""){
+          return true;
+      } else {
+        return false;
+      }
+    } else if(myNumber == 4){
+      if(this.state.player1cardPlayed != "" && this.state.player2cardPlayed != ""
+        && this.state.player3cardPlayed != ""){
+          return true;
+      } else {
+        return false;
+      }
+    } else {
+      console.log("trickOver is broken, myNumber: " + myNumber);
     }
   }
 
@@ -315,6 +486,7 @@ class Game extends React.Component {
         <p>Dealer: {this.state.currentDealer}</p>
         <p>currentBidder: {this.state.currentBidder}</p>
         <p>currentSuit: {this.state.currentSuit}</p>
+        <p>{this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"}</p>
         <div className="biddingBox">
           <input id="bidInput" type="text" placeholder="Lägg ett bud" />
           <button onClick={this.bidButtonClicked.bind(this)}>Ok</button>
