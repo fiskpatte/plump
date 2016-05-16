@@ -138,7 +138,6 @@ class Game extends React.Component {
 
   // det sista som händer är att man ändrar dealer och cards, annars skiter det sig med det asynchrona.
   dealNewHand(cardsCount){
-    //console.log(newDealer);
     var allCardsForThisRound = this.getCardsForRound();
     // ge varje spelare sina kort.
     for(var i = 0; i < 4; i++){
@@ -412,7 +411,7 @@ class Game extends React.Component {
     tempSum += this.state.player2bid;
     tempSum += this.state.player3bid;
     tempSum += this.state.player4bid;
-    console.log(tempSum);
+    console.log("bidSum returns: " + tempSum);
     return  tempSum;
   }
 
@@ -433,6 +432,8 @@ class Game extends React.Component {
         highest = true;
         gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(bid);
       }
+
+      $("#biddingBox").addClass("disabled");
 
       if(this.state.currentBidder == this.state.currentDealer){
         // budgivning ska avslutas
@@ -470,7 +471,7 @@ class Game extends React.Component {
         <p>currentBidder: {this.state.currentBidder}</p>
         <p>currentSuit: {this.state.currentSuit}</p>
         <p>{this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"}</p>
-        <div className="biddingBox">
+        <div id="biddingBox">
           <input id="bidInput" type="text" placeholder="Lägg ett bud" />
           <button onClick={this.bidButtonClicked.bind(this)}>Ok</button>
         </div>
