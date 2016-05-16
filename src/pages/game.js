@@ -77,14 +77,13 @@ class Game extends React.Component {
       gamesInProgressRef.child(userData.currenttable).on("value", function(childsnapshot){
         var gameData = childsnapshot.val();
         var newState = self.state;
+        newState.biddingMode    = gameData.biddingMode;
         newState.currentBidder  = gameData.currentBidder;
-        newState.currentRound   = gameData.currentHand;
         newState.currentDealer  = gameData.currentDealer;
+        newState.currentRound   = gameData.currentHand;
+        newState.currentSuit    = gameData.currentSuit;
+        newState.highestBidder  = gameData.highestBidder;
         newState.playersTurn    = gameData.playersTurn;
-        newState.player1cards   = gameData.players.player1.currentCards;
-        newState.player2cards   = gameData.players.player2.currentCards;
-        newState.player3cards   = gameData.players.player3.currentCards;
-        newState.player4cards   = gameData.players.player4.currentCards;
         newState.player1bid     = gameData.players.player1.currentBid;
         newState.player2bid     = gameData.players.player2.currentBid;
         newState.player3bid     = gameData.players.player3.currentBid;
@@ -93,13 +92,14 @@ class Game extends React.Component {
         newState.player2cardPlayed = gameData.players.player2.cardPlayed;
         newState.player3cardPlayed = gameData.players.player3.cardPlayed;
         newState.player4cardPlayed = gameData.players.player4.cardPlayed;
+        newState.player1cards   = gameData.players.player1.currentCards;
+        newState.player2cards   = gameData.players.player2.currentCards;
+        newState.player3cards   = gameData.players.player3.currentCards;
+        newState.player4cards   = gameData.players.player4.currentCards;
         newState.player1tricksTaken = gameData.players.player1.tricksTaken;
         newState.player2tricksTaken = gameData.players.player2.tricksTaken;
         newState.player3tricksTaken = gameData.players.player3.tricksTaken;
         newState.player4tricksTaken = gameData.players.player4.tricksTaken;
-        newState.highestBidder  = gameData.highestBidder;
-        newState.biddingMode    = gameData.biddingMode;
-        newState.currentSuit    = gameData.currentSuit;
 
         var tempCards = "";
         var tempCardArray = [];
@@ -116,6 +116,11 @@ class Game extends React.Component {
           newState.myPlayerNumber = 4;
           tempCards = gameData.players.player4.currentCards;
         }
+        // Om det är spelarens tur att buda så ska biddingBox visas
+        if(newState.biddingMode == true && newState.currentBidder == newState.myPlayerNumber){
+          $("#biddingBox").removeClass("disabled");
+        }
+
         for(var i = 0; i < tempCards.length; i += 2){
           tempCardArray.push(tempCards.substring(i, i+2));
         }
@@ -422,6 +427,7 @@ class Game extends React.Component {
     if(isNaN(bid)  || bid < 0 || bid > currentRound || ((this.state.currentBidder == this.state.currentDealer) && (this.bidSum() + bid) == currentRound )){
       console.log("Felaktigt bud. bid: "+ bid );
     } else{
+      // Budet var giltigt. Sparar ner det, gör olika checkar för att se vilket state man är i osv.
       console.log("sparar bud...");
       gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('currentBid').set(bid);
 
@@ -433,7 +439,9 @@ class Game extends React.Component {
         gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(bid);
       }
 
-      $("#biddingBox").addClass("disabled");
+      // Gömmer biddingboxen.
+      $("#biddingBox").hide();
+      console.log("gömmer biddingboxen");
 
       if(this.state.currentBidder == this.state.currentDealer){
         // budgivning ska avslutas
