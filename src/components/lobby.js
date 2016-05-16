@@ -119,11 +119,7 @@ class Lobby extends React.Component{
                   "host": game.val().player1
                 });
               }
-              openGamesRef.child(self.state.currentTable).remove();
-              console.log("player1: ." + game.val().player1 + ".");
-              console.log("player2: " + game.val().player2 + ".");
-              console.log("player3: " + game.val().player3 + ".");
-              console.log("player4: " + game.val().player4 + ".");
+              openGamesRef.child(self.state.currentTable).remove();              
               browserHistory.push('/game');
             }
           }
