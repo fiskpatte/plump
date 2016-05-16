@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "b48455232d0ba3b8c9ff"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "0c6e9c50576f32e847c9"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -34788,6 +34788,10 @@
 	                });
 	              }
 	              openGamesRef.child(self.state.currentTable).remove();
+	              console.log("player1: ." + game.val().player1 + ".");
+	              console.log("player2: " + game.val().player2 + ".");
+	              console.log("player3: " + game.val().player3 + ".");
+	              console.log("player4: " + game.val().player4 + ".");
 	              _reactRouter.browserHistory.push('/game');
 	            }
 	          }
