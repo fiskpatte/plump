@@ -155,7 +155,6 @@ class Lobby extends React.Component{
     });
   }
 
-
   // Sätt playern på vald plats om hen inte redan sitter på bordet
   takeSlotButtonClick(gameid, slotIndex){
     var self = this;

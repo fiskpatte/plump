@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "e01cab12ae6339ac80bb"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "b48455232d0ba3b8c9ff"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -34818,13 +34818,13 @@
 	      openGamesRef.child(newGameKey).set({
 	        "gameid": newGameKey,
 	        "player1": this.state.uid,
-	        // "player2": "",
-	        // "player3": "",
-	        // "player4": ""
+	        "player2": "",
+	        "player3": "",
+	        "player4": ""
 	        // för att slussas direkt till game när man startar nytt spel
-	        "player2": "sddsf",
-	        "player3": "sdff",
-	        "player4": "dfgdfg"
+	        // "player2": "sddsf",
+	        // "player3": "sdff",
+	        // "player4": "dfgdfg"
 	      });
 	    }
 
