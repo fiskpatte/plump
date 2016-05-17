@@ -46,6 +46,7 @@ class Game extends React.Component {
     };
     authData = root.getAuth();
     loggedinuserRef = usersRef.child(authData.uid);
+    console.log("loggedinuserRef.uid: " + loggedinuserRef);
     const cards = [];
     this.state = {uid: '', currentTable : '', currentRound : 10, deck : sortedDeck,
       player1cards : "", player2cards : "", player3cards : "", player4cards : "",
@@ -129,17 +130,9 @@ class Game extends React.Component {
                         });
         newState.myCards = tempCardArray;
         self.setState(newState);
-
       });
     });
-    // dealNewHand();
-    // Detta sätter igång spelet.
-    // Ska bara ske hos hosten.
-    // Alla får göra en check, se om hosten är online. Om inte: sätt nästa spelare som är online till host osv.
-    // Detta kommer definitivt bli meckigt men lösbart.
   }
-
-
 
   // det sista som händer är att man ändrar dealer och cards, annars skiter det sig med det asynchrona.
   dealNewHand(cardsCount){
@@ -160,7 +153,6 @@ class Game extends React.Component {
     gamesInProgressRef.child(this.state.currentTable).child('currentBidder').set(newBidder);
     // Först ska man buda.
     gamesInProgressRef.child(this.state.currentTable).child('biddingMode').set(true);
-
 
     // BUDGIVNING
     // Ha en div som innehåller budgivningsmekanismen. Visa den när spelet är i budläge.
@@ -185,7 +177,6 @@ class Game extends React.Component {
   }
 
   shuffle(array) {
-
     var tmp, current, top = array.length;
     if(top) while(--top) {
       current = Math.floor(Math.random() * (top + 1));
@@ -198,7 +189,6 @@ class Game extends React.Component {
 
   debugKnapp(){
     this.dealNewHand();
-
   }
 
   suitIsInMyCards(suit, cards){
@@ -251,19 +241,9 @@ class Game extends React.Component {
         if(firstOutToPlay){
           gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set(card[1]);
         }
-
         // Nästa spelares tur.
         var myNumber = this.state.myPlayerNumber;
-
         if(this.trickOver(myNumber)){
-          // 4 korts har lagts, alltså börjar nästa stick
-          // sätter currentSUit till ""
-
-
-          // låt hen vara den som spelar ut nästa gång.
-          //gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
-          // gör en funktion som skickar in current suit plus allas kort
-
           // kolla vem som fick sticket.
           var winnerOfTrick;
           var p1card = this.state.player1card;
@@ -293,16 +273,26 @@ class Game extends React.Component {
           } else {
             console.log("Error setting new trick count: winnerOfTrick: " + winnerOfTrick);
           }
-          console.log('Setting new trick count for player'+winnerOfTrick+". New value: " + newTrickCount + ".");
-          gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
-
+          // Kolla om hela rundan är slut
+          if(myCards == ""){
+              // Kolla vem som klarade sig och ge dem poäng
+              // Dela ut nya kort.
+              // Flytta dealerknappen
+              // Påbörja ny budrunda
+          } else{
+            // rundan är inte slut (men sticket är slut)
+            console.log('Setting new trick count for player'+winnerOfTrick+". New value: " + newTrickCount + ".");
+            gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
+          }
+          // ska göras oavsett
+          gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("cardPlayed").set("");
+          gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("cardPlayed").set("");
+          gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("cardPlayed").set("");
+          gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("cardPlayed").set("");
           gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
-        }
-        var nextPlayer = (this.state.playersTurn % 4) + 1;
-        gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
-        if(nextPlayer == this.state.highestBidder){
-            // detta är fel
         } else {
+          // sticket är inte slut
+          var nextPlayer = (this.state.playersTurn % 4) + 1;
           gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
         }
       }
@@ -419,7 +409,6 @@ class Game extends React.Component {
     console.log("bidSum returns: " + tempSum);
     return  tempSum;
   }
-
 
   bidButtonClicked(currentRound){
     var bid = $("#bidInput").val();
