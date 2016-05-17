@@ -107,13 +107,13 @@ class Game extends React.Component {
         if(self.state.uid == gameData.players.player1.uid){
           newState.myPlayerNumber = 1;
           tempCards = gameData.players.player1.currentCards;
-        } else if(uid == gameData.players.player2.uid){
+        } else if(self.state.uid == gameData.players.player2.uid){
           newState.myPlayerNumber = 2;
           tempCards = gameData.players.player2.currentCards;
-        } else if(uid == gameData.players.player3.uid){
+        } else if(self.state.uid == gameData.players.player3.uid){
           newState.myPlayerNumber = 3;
           tempCards = gameData.players.player3.currentCards;
-        } else if(uid == gameData.players.player4.uid){
+        } else if(self.state.uid == gameData.players.player4.uid){
           newState.myPlayerNumber = 4;
           tempCards = gameData.players.player4.currentCards;
         }
