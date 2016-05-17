@@ -204,6 +204,7 @@ class Game extends React.Component {
   // Här tar jag bort kortet man klickade på och uppdaterar db.
   cardClicked(card){
     if(this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false){
+      console.log("Går in i cardClicked");
       var validPlay = false;
       var curSuit = this.state.currentSuit;
       var myCards = "";
@@ -235,6 +236,7 @@ class Game extends React.Component {
 
       // gör alla uppdateringar
       if(validPlay){
+        console.log("Giltigt spel");
         myCards= updatedCards.replace(card, '');
         gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('currentCards').set(myCards);
         gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('cardPlayed').set(card);
@@ -295,6 +297,8 @@ class Game extends React.Component {
           var nextPlayer = (this.state.playersTurn % 4) + 1;
           gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
         }
+      } else {
+        console.log("Not valid play");
       }
     }
   }
