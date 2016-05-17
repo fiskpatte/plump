@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "9a4aa9faccec9470d265"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "1f832fc4094e411497aa"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -34753,28 +34753,32 @@
 	                      "host": true,
 	                      "currentBid": 0,
 	                      "cardPlayed": "",
-	                      "tricksTaken": 0
+	                      "tricksTaken": 0,
+	                      "score": 0
 	                    },
 	                    "player2": {
 	                      "uid": game.val().player2,
 	                      "host": false,
 	                      "currentBid": 0,
 	                      "cardPlayed": "",
-	                      "tricksTaken": 0
+	                      "tricksTaken": 0,
+	                      "score": 0
 	                    },
 	                    "player3": {
 	                      "uid": game.val().player3,
 	                      "host": false,
 	                      "currentBid": 0,
 	                      "cardPlayed": "",
-	                      "tricksTaken": 0
+	                      "tricksTaken": 0,
+	                      "score": 0
 	                    },
 	                    "player4": {
 	                      "uid": game.val().player4,
 	                      "host": false,
 	                      "currentBid": 0,
 	                      "cardPlayed": "",
-	                      "tricksTaken": 0
+	                      "tricksTaken": 0,
+	                      "score": 0
 	                    }
 	                  },
 	                  "currentHand": 10,
@@ -35109,15 +35113,16 @@
 	    _this.state = { uid: '', currentTable: '', currentRound: 10, deck: sortedDeck,
 	      player1cards: "", player2cards: "", player3cards: "", player4cards: "",
 	      player1bid: 0, player2bid: 0, player3bid: 0, player4bid: 0,
+	      player1score: 0, player2score: 0, player3score: 0, player4score: 0,
 	      player1cardPlayed: '', player2cardPlayed: '', player3cardPlayed: '', player4cardPlayed: '',
 	      player1tricksTaken: 0, player2tricksTaken: 0, player3tricksTaken: 0, player4tricksTaken: 0,
 	      currentDealer: 1, myCards: cards, myPlayerNumber: 1, playersTurn: 1,
 	      highestBid: 0, highestBidder: 1, biddingMode: true, currentBidder: 1,
 	      currentSuit: '' };
-	    _this.dealNewHand = _this.dealNewHand.bind(_this, _this.state.currentRound);
-	    _this.getCardsForRound = _this.getCardsForRound.bind(_this, _this.state.currentRound);
+	    _this.dealNewHand = _this.dealNewHand.bind(_this);
+	    _this.getCardsForRound = _this.getCardsForRound.bind(_this);
 	    _this.shuffle = _this.shuffle.bind(_this);
-	    _this.bidButtonClicked = _this.bidButtonClicked.bind(_this, _this.state.currentRound);
+	    _this.bidButtonClicked = _this.bidButtonClicked.bind(_this);
 	    _this.bidSum = _this.bidSum.bind(_this);
 	    _this.suitIsInMyCards = _this.suitIsInMyCards.bind(_this);
 	    _this.trickOver = _this.trickOver.bind(_this);
@@ -35159,6 +35164,10 @@
 	          newState.player2cards = gameData.players.player2.currentCards;
 	          newState.player3cards = gameData.players.player3.currentCards;
 	          newState.player4cards = gameData.players.player4.currentCards;
+	          newState.player1score = gameData.players.player1.score;
+	          newState.player2score = gameData.players.player2.score;
+	          newState.player3score = gameData.players.player3.score;
+	          newState.player4score = gameData.players.player4.score;
 	          newState.player1tricksTaken = gameData.players.player1.tricksTaken;
 	          newState.player2tricksTaken = gameData.players.player2.tricksTaken;
 	          newState.player3tricksTaken = gameData.players.player3.tricksTaken;
@@ -35203,7 +35212,8 @@
 	  }, {
 	    key: 'dealNewHand',
 	    value: function dealNewHand(cardsCount) {
-	      var allCardsForThisRound = this.getCardsForRound();
+	      console.log("dealNewHand.cardsCount: " + cardsCount);
+	      var allCardsForThisRound = this.getCardsForRound(cardsCount);
 	      // ge varje spelare sina kort.
 	      for (var i = 0; i < 4; i++) {
 	        var cardsAsString = "";
@@ -35218,6 +35228,8 @@
 	      console.log("newDealer: " + newDealer);
 	      gamesInProgressRef.child(this.state.currentTable).child('currentDealer').set(newDealer);
 	      gamesInProgressRef.child(this.state.currentTable).child('currentBidder').set(newBidder);
+	      // Detta krävs för att det helt säkert ska bli han om alla väljer 0.
+	      gamesInProgressRef.child(this.state.currentTable).child('highestBidder').set(newBidder);
 	      // Först ska man buda.
 	      gamesInProgressRef.child(this.state.currentTable).child('biddingMode').set(true);
 
@@ -35238,6 +35250,7 @@
 	    value: function getCardsForRound(cardsPerPerson) {
 	      var shuffledDeck = this.shuffle(sortedDeck);
 	      var cardsForThisRound = [];
+	      console.log("getCardsForRound.cardsPerPerson: " + cardsPerPerson);
 	      for (var i = 0; i < cardsPerPerson * 4; i++) {
 	        cardsForThisRound.push(shuffledDeck[i]);
 	      }
@@ -35260,7 +35273,7 @@
 	  }, {
 	    key: 'debugKnapp',
 	    value: function debugKnapp() {
-	      this.dealNewHand();
+	      this.dealNewHand(10);
 	    }
 	  }, {
 	    key: 'suitIsInMyCards',
@@ -35367,20 +35380,146 @@
 	            if (myCards == "") {
 	              console.log("rundan är slut");
 	              // Kolla vem som klarade sig och ge dem poäng
+	              // måste hantera winnerOfTrick separat eftersom hen inte har uppdaterat sin data än, eller iaf kan man inte räkna med det.
+	              // kolla om player1 klarade sig
+	              if (winnerOfTrick == 1) {
+	                if (this.state.player1bid == newTrickCount) {
+	                  // plussa på med 10 / 100 plus bid
+	                  var pointsEarned = this.state.player1bid;
+	                  if (this.state.player1bid == 10) {
+	                    pointsEarned = pointsEarned * 11;
+	                  } else {
+	                    pointsEarned += 10;
+	                  }
+	                  var newScore = this.state.player1score;
+	                  newScore += pointsEarned;
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("score").set(newScore);
+	                }
+	              } else if (this.state.player1bid == this.state.player1tricksTaken) {
+	                // måste även kolla för 0
+	                var newScore = this.state.player1score;
+	                if (this.state.player1bid == 0) {
+	                  newScore += 5;
+	                } else {
+	                  newScore += 10 + this.state.player1bid;
+	                }
+	                gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("score").set(newScore);
+	              } else {
+	                console.log("klarade sig inte");
+	              }
+
+	              if (winnerOfTrick == 2) {
+	                if (this.state.player2bid == newTrickCount) {
+	                  // plussa på med 10 / 100 plus bid
+	                  var pointsEarned = this.state.player2bid;
+	                  if (this.state.player2bid == 10) {
+	                    pointsEarned = pointsEarned * 11;
+	                  } else {
+	                    pointsEarned += 10;
+	                  }
+	                  var newScore = this.state.player2score;
+	                  newScore += pointsEarned;
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("score").set(newScore);
+	                } else {
+	                  console.log("klarade sig inte");
+	                }
+	              } else {
+	                if (this.state.player2bid == this.state.player2tricksTaken) {
+	                  // måste även kolla för 0
+	                  var newScore = this.state.player2score;
+	                  if (this.state.player2bid == 0) {
+	                    newScore += 5;
+	                  } else {
+	                    newScore += 10 + this.state.player2bid;
+	                  }
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("score").set(newScore);
+	                }
+	              }
+
+	              if (winnerOfTrick == 3) {
+	                if (this.state.player3bid == newTrickCount) {
+	                  // plussa på med 10 / 100 plus bid
+	                  var pointsEarned = this.state.player3bid;
+	                  if (this.state.player3bid == 10) {
+	                    pointsEarned = pointsEarned * 11;
+	                  } else {
+	                    pointsEarned += 10;
+	                  }
+	                  var newScore = this.state.player3score;
+	                  newScore += pointsEarned;
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("score").set(newScore);
+	                }
+	              } else {
+	                if (this.state.player3bid == this.state.player3tricksTaken) {
+	                  // måste även kolla för 0
+	                  var newScore = this.state.player3score;
+	                  if (this.state.player3bid == 0) {
+	                    newScore += 5;
+	                  } else {
+	                    newScore += 10 + this.state.player3bid;
+	                  }
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("score").set(newScore);
+	                }
+	              }
+
+	              if (winnerOfTrick == 4) {
+	                if (this.state.player4bid == newTrickCount) {
+	                  // plussa på med 10 / 100 plus bid
+	                  var pointsEarned = this.state.player4bid;
+	                  if (this.state.player4bid == 10) {
+	                    pointsEarned = pointsEarned * 11;
+	                  } else {
+	                    pointsEarned += 10;
+	                  }
+	                  var newScore = this.state.player4score;
+	                  newScore += pointsEarned;
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("score").set(newScore);
+	                }
+	              } else {
+	                if (this.state.player4bid == this.state.player4tricksTaken) {
+	                  // måste även kolla för 0
+	                  var newScore = this.state.player4score;
+	                  if (this.state.player4bid == 0) {
+	                    newScore += 5;
+	                  } else {
+	                    newScore += 10 + this.state.player4bid;
+	                  }
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("score").set(newScore);
+	                }
+	              }
+
 	              // Dela ut nya kort.
 	              // Flytta dealerknappen
 	              // Påbörja ny budrunda
+	              // kör dealNewHand();
+	              if (this.state.cardsCount == 2) {
+	                // Spelet slut.
+	              } else {
+	                  var newRound = this.state.currentRound - 1;
+	                  gamesInProgressRef.child(this.state.currentTable).child("currentHand").set(newRound);
+	                  gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(0);
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("currentBid").set(0);
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("currentBid").set(0);
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("currentBid").set(0);
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("currentBid").set(0);
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("tricksTaken").set(0);
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("tricksTaken").set(0);
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("tricksTaken").set(0);
+	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("tricksTaken").set(0);
+	                  this.dealNewHand(newRound);
+	                }
 	            } else {
-	                // rundan är inte slut (men sticket är slut)
-	                console.log('Setting new trick count for player' + winnerOfTrick + ". New value: " + newTrickCount + ".");
-	                gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
-	                gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(winnerOfTrick);
-	              }
+	              // rundan är inte slut (men sticket är slut)
+	              console.log('Setting new trick count for player' + winnerOfTrick + ". New value: " + newTrickCount + ".");
+	              gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
+	              gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(winnerOfTrick);
+	            }
 	            // ska göras oavsett
 	            gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("cardPlayed").set("");
 	            gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("cardPlayed").set("");
 	            gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("cardPlayed").set("");
 	            gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("cardPlayed").set("");
+
 	            gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
 	          } else {
 	            // sticket är inte slut
@@ -35613,7 +35752,8 @@
 	    }
 	  }, {
 	    key: 'bidButtonClicked',
-	    value: function bidButtonClicked(currentRound) {
+	    value: function bidButtonClicked() {
+	      var currentRound = this.state.currentRound;
 	      if (this.state.currentBidder == this.state.myPlayerNumber) {
 	        var bid = $("#bidInput").val();
 	        bid = bid * 1;
@@ -35729,6 +35869,30 @@
 	          null,
 	          'highestBidder: ',
 	          this.state.highestBidder
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Spelare1 bud: ',
+	          this.state.player1bid
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Spelare2 bud: ',
+	          this.state.player2bid
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Spelare3 bud: ',
+	          this.state.player3bid
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Spelare4 bud: ',
+	          this.state.player4bid
 	        ),
 	        _react2.default.createElement(
 	          'p',
