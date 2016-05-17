@@ -51,6 +51,7 @@ class Game extends React.Component {
     this.state = {uid: '', currentTable : '', currentRound : 10, deck : sortedDeck,
       player1cards : "", player2cards : "", player3cards : "", player4cards : "",
       player1bid : 0, player2bid : 0, player3bid : 0, player4bid : 0,
+      player1score: 0, player2score: 0, player3score: 0, player4score: 0,
       player1cardPlayed: '', player2cardPlayed: '', player3cardPlayed: '', player4cardPlayed: '',
       player1tricksTaken: 0, player2tricksTaken: 0, player3tricksTaken: 0, player4tricksTaken: 0,
       currentDealer: 1, myCards : cards, myPlayerNumber : 1, playersTurn: 1,
@@ -83,6 +84,7 @@ class Game extends React.Component {
         newState.currentDealer  = gameData.currentDealer;
         newState.currentRound   = gameData.currentHand;
         newState.currentSuit    = gameData.currentSuit;
+        newState.highestBid     = gameData.highestBid;
         newState.highestBidder  = gameData.highestBidder;
         newState.playersTurn    = gameData.playersTurn;
         newState.player1bid     = gameData.players.player1.currentBid;
@@ -97,6 +99,10 @@ class Game extends React.Component {
         newState.player2cards   = gameData.players.player2.currentCards;
         newState.player3cards   = gameData.players.player3.currentCards;
         newState.player4cards   = gameData.players.player4.currentCards;
+        newState.player1score   = gameData.players.player1.score;
+        newState.player2score   = gameData.players.player2.score;
+        newState.player3score   = gameData.players.player3.score;
+        newState.player4score   = gameData.players.player4.score;
         newState.player1tricksTaken = gameData.players.player1.tricksTaken;
         newState.player2tricksTaken = gameData.players.player2.tricksTaken;
         newState.player3tricksTaken = gameData.players.player3.tricksTaken;
@@ -293,13 +299,20 @@ class Game extends React.Component {
           if(myCards == ""){
             console.log("rundan är slut");
               // Kolla vem som klarade sig och ge dem poäng
+              if(winnerOfTrick == 1){
+                if(newTrickCount == player1bid){
+
+                }
+              }
               // Dela ut nya kort.
               // Flytta dealerknappen
               // Påbörja ny budrunda
+
           } else{
             // rundan är inte slut (men sticket är slut)
             console.log('Setting new trick count for player'+winnerOfTrick+". New value: " + newTrickCount + ".");
             gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
+            gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(winnerOfTrick);
           }
           // ska göras oavsett
           gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("cardPlayed").set("");
@@ -451,12 +464,11 @@ class Game extends React.Component {
         // Detta bud är högst.
         if(bid > this.state.highestBid){
           highest = true;
+          // gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.myPlayerNumber);
+          gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.myPlayerNumber);
+          gamesInProgressRef.child(this.state.currentTable).child('highestBidder').set(this.state.myPlayerNumber);
           gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(bid);
         }
-
-        // Gömmer biddingboxen.
-      //  $("#biddingBox").hide();
-        console.log("gömmer biddingboxen");
 
         if(this.state.currentBidder == this.state.currentDealer){
           // budgivning ska avslutas
@@ -465,11 +477,6 @@ class Game extends React.Component {
           // spelarna ska kunna klicka på kort och spela. Man måste sätta vem som börjar.
           // highest bidder börjar...
           // Återigen, hade inte highest-variabeln använts så hade man kanske missat att man nyss uppdaterat highestBidder
-          if(highest){
-            gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.myPlayerNumber);
-          } else {
-            gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.highestBidder);
-          }
 
         } else {
           // nästa budare ska sättas
@@ -496,6 +503,15 @@ class Game extends React.Component {
         <p>Dealer: {this.state.currentDealer}</p>
         <p>currentBidder: {this.state.currentBidder}</p>
         <p>currentSuit: {this.state.currentSuit}</p>
+        <p>highestBidder: {this.state.highestBidder}</p>
+        <p>Spelare1 bud: {this.state.player1bid}</p>
+        <p>Spelare2 bud: {this.state.player2bid}</p>
+        <p>Spelare3 bud: {this.state.player3bid}</p>
+        <p>Spelare4 bud: {this.state.player4bid}</p>
+        <p>Spelare1 stick: {this.state.player1tricksTaken}</p>
+        <p>Spelare2 stick: {this.state.player2tricksTaken}</p>
+        <p>Spelare3 stick: {this.state.player3tricksTaken}</p>
+        <p>Spelare4 stick: {this.state.player4tricksTaken}</p>
         <p>{this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"}</p>
         <div id="biddingBox">
           <input id="bidInput" type="text" placeholder="Lägg ett bud" />

@@ -85,33 +85,38 @@ class Lobby extends React.Component{
                         "host": true,
                         "currentBid": 0,
                         "cardPlayed": "",
-                        "tricksTaken": 0
+                        "tricksTaken": 0,
+                        "score": 0
                      },
                      "player2" : {
                         "uid": game.val().player2,
                         "host": false,
                         "currentBid": 0,
                         "cardPlayed": "",
-                        "tricksTaken": 0
+                        "tricksTaken": 0,
+                        "score": 0
                       },
                       "player3" : {
                         "uid": game.val().player3,
                         "host": false,
                         "currentBid": 0,
                         "cardPlayed": "",
-                        "tricksTaken": 0
+                        "tricksTaken": 0,
+                        "score": 0
                       },
                         "player4" : {
                           "uid": game.val().player4,
                           "host": false,
                           "currentBid": 0,
                           "cardPlayed": "",
-                          "tricksTaken": 0
+                          "tricksTaken": 0,
+                          "score": 0
                       }
                   },
                   "currentHand": 10,
                   "currentDealer": 4,
                   "playersTurn": 1,
+                  "highestBid": 0,
                   "highestBidder": 1,
                   "currentBidder": 1,
                   "currentSuit": "",

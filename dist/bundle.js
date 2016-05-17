@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "982a966a012c86a1be31"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "9a4aa9faccec9470d265"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -34780,6 +34780,7 @@
 	                  "currentHand": 10,
 	                  "currentDealer": 4,
 	                  "playersTurn": 1,
+	                  "highestBid": 0,
 	                  "highestBidder": 1,
 	                  "currentBidder": 1,
 	                  "currentSuit": "",
@@ -35143,6 +35144,7 @@
 	          newState.currentDealer = gameData.currentDealer;
 	          newState.currentRound = gameData.currentHand;
 	          newState.currentSuit = gameData.currentSuit;
+	          newState.highestBid = gameData.highestBid;
 	          newState.highestBidder = gameData.highestBidder;
 	          newState.playersTurn = gameData.playersTurn;
 	          newState.player1bid = gameData.players.player1.currentBid;
@@ -35372,6 +35374,7 @@
 	                // rundan är inte slut (men sticket är slut)
 	                console.log('Setting new trick count for player' + winnerOfTrick + ". New value: " + newTrickCount + ".");
 	                gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
+	                gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(winnerOfTrick);
 	              }
 	            // ska göras oavsett
 	            gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("cardPlayed").set("");
@@ -35626,12 +35629,11 @@
 	          // Detta bud är högst.
 	          if (bid > this.state.highestBid) {
 	            highest = true;
+	            // gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.myPlayerNumber);
+	            gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.myPlayerNumber);
+	            gamesInProgressRef.child(this.state.currentTable).child('highestBidder').set(this.state.myPlayerNumber);
 	            gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(bid);
 	          }
-
-	          // Gömmer biddingboxen.
-	          //  $("#biddingBox").hide();
-	          console.log("gömmer biddingboxen");
 
 	          if (this.state.currentBidder == this.state.currentDealer) {
 	            // budgivning ska avslutas
@@ -35640,16 +35642,11 @@
 	            // spelarna ska kunna klicka på kort och spela. Man måste sätta vem som börjar.
 	            // highest bidder börjar...
 	            // Återigen, hade inte highest-variabeln använts så hade man kanske missat att man nyss uppdaterat highestBidder
-	            if (highest) {
-	              gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.myPlayerNumber);
-	            } else {
-	              gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.highestBidder);
-	            }
 	          } else {
-	            // nästa budare ska sättas
-	            var newBidder = this.state.currentBidder % 4 + 1;
-	            gamesInProgressRef.child(this.state.currentTable).child('currentBidder').set(newBidder);
-	          }
+	              // nästa budare ska sättas
+	              var newBidder = this.state.currentBidder % 4 + 1;
+	              gamesInProgressRef.child(this.state.currentTable).child('currentBidder').set(newBidder);
+	            }
 	        }
 	      } else {
 	        console.log("Det är inte din tur");
@@ -35726,6 +35723,36 @@
 	          null,
 	          'currentSuit: ',
 	          this.state.currentSuit
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'highestBidder: ',
+	          this.state.highestBidder
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Spelare1 stick: ',
+	          this.state.player1tricksTaken
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Spelare2 stick: ',
+	          this.state.player2tricksTaken
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Spelare3 stick: ',
+	          this.state.player3tricksTaken
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Spelare4 stick: ',
+	          this.state.player4tricksTaken
 	        ),
 	        _react2.default.createElement(
 	          'p',
