@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "f1278b0c92c5a0107fe0"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "982a966a012c86a1be31"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -35179,7 +35179,9 @@
 	          }
 	          // Om det är spelarens tur att buda så ska biddingBox visas
 	          if (newState.biddingMode == true && newState.currentBidder == newState.myPlayerNumber) {
-	            $("#biddingBox").removeClass("disabled");
+	            $("#biddingBox").show();
+	          } else {
+	            $("#biddingBox").hide();
 	          }
 
 	          for (var i = 0; i < tempCards.length; i += 2) {
@@ -35276,6 +35278,7 @@
 	    key: 'cardClicked',
 	    value: function cardClicked(card) {
 	      if (this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false) {
+	        console.log("Går in i cardClicked");
 	        var validPlay = false;
 	        var curSuit = this.state.currentSuit;
 	        var myCards = "";
@@ -35307,7 +35310,8 @@
 
 	        // gör alla uppdateringar
 	        if (validPlay) {
-	          myCards = updatedCards.replace(card, '');
+	          console.log("Giltigt spel");
+	          myCards = myCards.replace(card, '');
 	          gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('currentCards').set(myCards);
 	          gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('cardPlayed').set(card);
 	          if (firstOutToPlay) {
@@ -35316,24 +35320,36 @@
 	          // Nästa spelares tur.
 	          var myNumber = this.state.myPlayerNumber;
 	          if (this.trickOver(myNumber)) {
+	            console.log("trick is over");
 	            // kolla vem som fick sticket.
 	            var winnerOfTrick;
-	            var p1card = this.state.player1card;
-	            var p2card = this.state.player2card;
-	            var p3card = this.state.player3card;
-	            var p4card = this.state.player4card;
+
+	            var p1card = this.state.player1cardPlayed;
+	            var p2card = this.state.player2cardPlayed;
+	            var p3card = this.state.player3cardPlayed;
+	            var p4card = this.state.player4cardPlayed;
+
 	            if (this.state.myPlayerNumber == 1) {
-	              winnerOfTrick = this.trickWinner(suit, card, p2card, p3card, p4card);
+	              console.log("myPLauyer = 1");
+	              console.log(card + " " + p2card + " " + p3card + " " + p4card);
+	              winnerOfTrick = this.trickWinner(curSuit, card, p2card, p3card, p4card);
 	            } else if (this.state.myPlayerNumber == 2) {
-	              winnerOfTrick = this.trickWinner(suit, p1card, card, p3card, p4card);
+	              console.log("myPLauyer = 2");
+	              console.log(p1card + " " + card + " " + p3card + " " + p4card);
+	              winnerOfTrick = this.trickWinner(curSuit, p1card, card, p3card, p4card);
 	            } else if (this.state.myPlayerNumber == 3) {
-	              winnerOfTrick = this.trickWinner(suit, p1card, p2card, card, p4card);
+	              console.log("myPLauyer = 3");
+	              console.log(p1card + " " + p2card + " " + card + " " + p4card);
+	              winnerOfTrick = this.trickWinner(curSuit, p1card, p2card, card, p4card);
 	            } else if (this.state.myPlayerNumber == 4) {
-	              winnerOfTrick = this.trickWinner(suit, p1card, p2card, p3card, card);
+	              console.log("myPLauyer = 4");
+	              console.log(p1card + " " + p2card + " " + p3card + " " + card);
+	              winnerOfTrick = this.trickWinner(curSuit, p1card, p2card, p3card, card);
 	            }
 
 	            // räkna upp den spelarens stickräknare.
 	            var newTrickCount = 1;
+	            console.log("winnerOfTrick: " + winnerOfTrick);
 	            if (winnerOfTrick == 1) {
 	              newTrickCount += this.state.player1tricksTaken;
 	            } else if (winnerOfTrick == 2) {
@@ -35347,6 +35363,7 @@
 	            }
 	            // Kolla om hela rundan är slut
 	            if (myCards == "") {
+	              console.log("rundan är slut");
 	              // Kolla vem som klarade sig och ge dem poäng
 	              // Dela ut nya kort.
 	              // Flytta dealerknappen
@@ -35364,15 +35381,23 @@
 	            gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
 	          } else {
 	            // sticket är inte slut
+	            console.log("Sticket är inte slut");
 	            var nextPlayer = this.state.playersTurn % 4 + 1;
 	            gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
 	          }
+	        } else {
+	          console.log("Not valid play");
 	        }
 	      }
 	    }
 	  }, {
 	    key: 'trickWinner',
 	    value: function trickWinner(suit, player1card, player2card, player3card, player4card) {
+	      console.log("går in i trickWinner");
+	      console.log("player1card: " + player1card);
+	      console.log("player2card: " + player2card);
+	      console.log("player3card: " + player3card);
+	      console.log("player4card: " + player4card);
 	      var check1 = player1card[1] == suit ? true : false;
 	      var check2 = player2card[1] == suit ? true : false;
 	      var check3 = player3card[1] == suit ? true : false;
@@ -35586,44 +35611,48 @@
 	  }, {
 	    key: 'bidButtonClicked',
 	    value: function bidButtonClicked(currentRound) {
-	      var bid = $("#bidInput").val();
-	      bid = bid * 1;
-	      if (isNaN(bid) || bid < 0 || bid > currentRound || this.state.currentBidder == this.state.currentDealer && this.bidSum() + bid == currentRound) {
-	        console.log("Felaktigt bud. bid: " + bid);
-	      } else {
-	        // Budet var giltigt. Sparar ner det, gör olika checkar för att se vilket state man är i osv.
-	        console.log("sparar bud...");
-	        gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('currentBid').set(bid);
-
-	        // detta behävs fär att slippa async-problem
-	        var highest = false;
-	        // Detta bud är högst.
-	        if (bid > this.state.highestBid) {
-	          highest = true;
-	          gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(bid);
-	        }
-
-	        // Gömmer biddingboxen.
-	        $("#biddingBox").hide();
-	        console.log("gömmer biddingboxen");
-
-	        if (this.state.currentBidder == this.state.currentDealer) {
-	          // budgivning ska avslutas
-	          console.log('sista budet.');
-	          gamesInProgressRef.child(this.state.currentTable).child('biddingMode').set(false);
-	          // spelarna ska kunna klicka på kort och spela. Man måste sätta vem som börjar.
-	          // highest bidder börjar...
-	          // Återigen, hade inte highest-variabeln använts så hade man kanske missat att man nyss uppdaterat highestBidder
-	          if (highest) {
-	            gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.myPlayerNumber);
-	          } else {
-	            gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.highestBidder);
-	          }
+	      if (this.state.currentBidder == this.state.myPlayerNumber) {
+	        var bid = $("#bidInput").val();
+	        bid = bid * 1;
+	        if (isNaN(bid) || bid < 0 || bid > currentRound || this.state.currentBidder == this.state.currentDealer && this.bidSum() + bid == currentRound) {
+	          console.log("Felaktigt bud. bid: " + bid);
 	        } else {
-	          // nästa budare ska sättas
-	          var newBidder = this.state.currentBidder % 4 + 1;
-	          gamesInProgressRef.child(this.state.currentTable).child('currentBidder').set(newBidder);
+	          // Budet var giltigt. Sparar ner det, gör olika checkar för att se vilket state man är i osv.
+	          console.log("sparar bud...");
+	          gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('currentBid').set(bid);
+
+	          // detta behävs fär att slippa async-problem
+	          var highest = false;
+	          // Detta bud är högst.
+	          if (bid > this.state.highestBid) {
+	            highest = true;
+	            gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(bid);
+	          }
+
+	          // Gömmer biddingboxen.
+	          //  $("#biddingBox").hide();
+	          console.log("gömmer biddingboxen");
+
+	          if (this.state.currentBidder == this.state.currentDealer) {
+	            // budgivning ska avslutas
+	            console.log('sista budet.');
+	            gamesInProgressRef.child(this.state.currentTable).child('biddingMode').set(false);
+	            // spelarna ska kunna klicka på kort och spela. Man måste sätta vem som börjar.
+	            // highest bidder börjar...
+	            // Återigen, hade inte highest-variabeln använts så hade man kanske missat att man nyss uppdaterat highestBidder
+	            if (highest) {
+	              gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.myPlayerNumber);
+	            } else {
+	              gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(this.state.highestBidder);
+	            }
+	          } else {
+	            // nästa budare ska sättas
+	            var newBidder = this.state.currentBidder % 4 + 1;
+	            gamesInProgressRef.child(this.state.currentTable).child('currentBidder').set(newBidder);
+	          }
 	        }
+	      } else {
+	        console.log("Det är inte din tur");
 	      }
 	    }
 	  }, {
