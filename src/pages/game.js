@@ -57,7 +57,7 @@ class Game extends React.Component {
       player1tricksTaken: 0, player2tricksTaken: 0, player3tricksTaken: 0, player4tricksTaken: 0,
       currentDealer: 1, myCards : cards, myPlayerNumber : 1, playersTurn: 1,
       highestBid: 0, highestBidder: 1, biddingMode : true, currentBidder : 1,
-      currentSuit: '', myTrickCount: 0, myBid: 0};
+      currentSuit: '', myTrickCount: 0, myBid: 0, cardsOnTable: []};
     this.dealNewHand = this.dealNewHand.bind(this);
     this.getCardsForRound = this.getCardsForRound.bind(this);
     this.shuffle = this.shuffle.bind(this);
@@ -136,13 +136,7 @@ class Game extends React.Component {
           newState.myTrickCount = gameData.players.player4.tricksTaken;
           tempCards = gameData.players.player4.currentCards;
         }
-        // Om det är spelarens tur att buda så ska biddingBox visas
-        if(newState.biddingMode == true && newState.currentBidder == newState.myPlayerNumber){
-          $("#bidInput").val("");
-          $("#biddingBox").show();
-        } else{
-          $("#biddingBox").hide();
-        }
+
 
         for(var i = 0; i < tempCards.length; i += 2){
           tempCardArray.push(tempCards.substring(i, i+2));
@@ -151,6 +145,24 @@ class Game extends React.Component {
                           return ranks[right] - ranks[left]; // descending order
                         });
         newState.myCards = tempCardArray;
+
+        var tempCurrentTableArray = [];
+        var tempC = gameData.cardsOnTable;
+        for(var i = 0; i < tempC.length; i += 2){
+          tempCurrentTableArray.push(tempC.substring(i, i+2));
+        }
+        newState.cardsOnTable = tempCurrentTableArray;
+
+        $("#biddingBox").hide();
+        // Om det är spelarens tur att buda så ska biddingBox visas
+        if(newState.biddingMode == true && newState.currentBidder == newState.myPlayerNumber){
+          $("#bidInput").val("");
+          $("#biddingBox").show();
+        } else{
+          $("#biddingBox").hide();
+          console.log("nu ska den gömmas");
+        }
+
         self.setState(newState);
       });
     });
@@ -263,6 +275,12 @@ class Game extends React.Component {
         myCards = myCards.replace(card, '');
         gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('currentCards').set(myCards);
         gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('cardPlayed').set(card);
+
+        // Lägg till kortet till bordet
+        var curCardsOnTable = this.state.cardsOnTable;
+        curCardsOnTable += card;
+        gamesInProgressRef.child(this.state.currentTable).child('cardsOnTable').set(curCardsOnTable);
+
         if(firstOutToPlay){
           gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set(card[1]);
         }
@@ -484,6 +502,8 @@ class Game extends React.Component {
             // rundan är inte slut (men sticket är slut)
             gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
             gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(winnerOfTrick);
+            // Låter korten vara kvar på bordet i 3 sekunder och tömmder det sedan
+            setInterval(function(){gamesInProgressRef.child(this.state.currentTable).child("cardsOnTable").set("");},3000);
           }
           // ska göras oavsett
           gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("cardPlayed").set("");
@@ -492,6 +512,9 @@ class Game extends React.Component {
           gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("cardPlayed").set("");
 
           gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
+
+
+
         } else {
           // sticket är inte slut
           var nextPlayer = (this.state.playersTurn % 4) + 1;
@@ -672,6 +695,11 @@ class Game extends React.Component {
         <div id="biddingBox">
           <input id="bidInput" type="text" placeholder="Lägg ett bud" />
           <button onClick={this.bidButtonClicked.bind(this)}>Ok</button>
+        </div>
+        <div id="tableDiv">
+          {this.state.cardsOnTable.map((card, index) => (
+            <img key={index} src={"./images/cards/minifiedcards/"+card+".png"} />
+          ))}
         </div>
         <p>Mina kort: </p>
         {this.state.myCards.map((card, index) => (
