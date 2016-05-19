@@ -48,6 +48,7 @@ class Game extends React.Component {
     loggedinuserRef = usersRef.child(authData.uid);
     console.log("loggedinuserRef.uid: " + loggedinuserRef);
     const cards = [];
+    const tableCards = [];
     this.state = {uid: '', currentTable : '', currentRound : 10, deck : sortedDeck,
       player1cards : "", player2cards : "", player3cards : "", player4cards : "",
       player1uid: '', player2uid: '', player3uid: '', player4uid: '',
@@ -57,7 +58,7 @@ class Game extends React.Component {
       player1tricksTaken: 0, player2tricksTaken: 0, player3tricksTaken: 0, player4tricksTaken: 0,
       currentDealer: 1, myCards : cards, myPlayerNumber : 1, playersTurn: 1,
       highestBid: 0, highestBidder: 1, biddingMode : true, currentBidder : 1,
-      currentSuit: '', myTrickCount: 0, myBid: 0, cardsOnTable: []};
+      currentSuit: '', myTrickCount: 0, myBid: 0, cardsOnTable: tableCards, currentTableAsString: ""};
     this.dealNewHand = this.dealNewHand.bind(this);
     this.getCardsForRound = this.getCardsForRound.bind(this);
     this.shuffle = this.shuffle.bind(this);
@@ -80,6 +81,7 @@ class Game extends React.Component {
       gamesInProgressRef.child(userData.currenttable).on("value", function(childsnapshot){
         var gameData = childsnapshot.val();
         var newState = self.state;
+        newState.currentTableAsString = gameData.cardsOnTable;
         newState.biddingMode    = gameData.biddingMode;
         newState.currentBidder  = gameData.currentBidder;
         newState.currentDealer  = gameData.currentDealer;
@@ -148,8 +150,8 @@ class Game extends React.Component {
 
         var tempCurrentTableArray = [];
         var tempC = gameData.cardsOnTable;
-        for(var i = 0; i < tempC.length; i += 2){
-          tempCurrentTableArray.push(tempC.substring(i, i+2));
+        for(var j = 0; j < tempC.length; j += 2){
+          tempCurrentTableArray.push(tempC.substring(j, j+2));
         }
         newState.cardsOnTable = tempCurrentTableArray;
 
@@ -160,7 +162,6 @@ class Game extends React.Component {
           $("#biddingBox").show();
         } else{
           $("#biddingBox").hide();
-          console.log("nu ska den gömmas");
         }
 
         self.setState(newState);
@@ -277,8 +278,11 @@ class Game extends React.Component {
         gamesInProgressRef.child(this.state.currentTable).child('players').child('player'+ (this.state.myPlayerNumber)).child('cardPlayed').set(card);
 
         // Lägg till kortet till bordet
-        var curCardsOnTable = this.state.cardsOnTable;
+        var curCardsOnTable = this.state.currentTableAsString;
+        console.log("curCardsOnTable är nu: " + curCardsOnTable);
         curCardsOnTable += card;
+        console.log("Lägger till följande kort till bordet: " + card);
+        console.log("nu däremot är curCardsOnTable: " + curCardsOnTable);
         gamesInProgressRef.child(this.state.currentTable).child('cardsOnTable').set(curCardsOnTable);
 
         if(firstOutToPlay){
@@ -503,18 +507,15 @@ class Game extends React.Component {
             gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
             gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(winnerOfTrick);
             // Låter korten vara kvar på bordet i 3 sekunder och tömmder det sedan
-            setInterval(function(){gamesInProgressRef.child(this.state.currentTable).child("cardsOnTable").set("");},3000);
+            var self = this;
+            setTimeout(function(){gamesInProgressRef.child(self.state.currentTable).child("cardsOnTable").set("");},2200);
           }
           // ska göras oavsett
           gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("cardPlayed").set("");
           gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("cardPlayed").set("");
           gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("cardPlayed").set("");
           gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("cardPlayed").set("");
-
           gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
-
-
-
         } else {
           // sticket är inte slut
           var nextPlayer = (this.state.playersTurn % 4) + 1;
@@ -696,6 +697,7 @@ class Game extends React.Component {
           <input id="bidInput" type="text" placeholder="Lägg ett bud" />
           <button onClick={this.bidButtonClicked.bind(this)}>Ok</button>
         </div>
+        <p>cardsOnTable: {this.state.cardsOnTable}</p>
         <div id="tableDiv">
           {this.state.cardsOnTable.map((card, index) => (
             <img key={index} src={"./images/cards/minifiedcards/"+card+".png"} />
