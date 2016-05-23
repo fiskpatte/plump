@@ -1,8 +1,8 @@
 import React from 'react';
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 
-var root = new Firebase("https://plump.firebaseio.com");
-var authData;
+var root = firebase.database().ref();
+var auth;
 var users;
 var loggedinuserRef;
 var usersRef = root.child('users');
@@ -11,8 +11,8 @@ var openGamesRef = root.child('opengames');
 class Lobby extends React.Component{
   constructor(props){
     super(props);
-    authData = root.getAuth();
-    loggedinuserRef = root.child('users').child(authData.uid);
+    auth = firebase.auth();
+    loggedinuserRef = root.child('users').child(auth.uid);
     this.state = {uid: '', username: '', userTotalScore: 0, openGames: [], currentTable: ''};
   }
 
@@ -21,12 +21,14 @@ class Lobby extends React.Component{
     loggedinuserRef.on("value", function(snapshot){
         var userData = snapshot.val();
         var newState = self.state;
-        newState.uid = snapshot.key();
+        newState.uid = snapshot.key;
         newState.currentTable = userData.currenttable;
         newState.username = userData.displayname;
         newState.userTotalScore = userData.totalscore;
         self.setState(newState);
     });
+
+    
     openGamesRef.on('value', function(snapshot){
       // radera alla games där det inte sitter någon
       var gamesToRemove = [];
@@ -47,7 +49,7 @@ class Lobby extends React.Component{
           && game.val().player2 == ""
           && game.val().player3 == ""
           && game.val().player4 == ""){
-            gamesToRemove.push(game.key());
+            gamesToRemove.push(game.key);
         }
       });
 
@@ -150,7 +152,7 @@ class Lobby extends React.Component{
   newGameButtonClicked(){
     var self = this;
     var newGameRef = openGamesRef.push();
-    var newGameKey = newGameRef.key();
+    var newGameKey = newGameRef.key;
     loggedinuserRef.child('currenttable').set(newGameKey);
     openGamesRef.child(newGameKey).set({
       "gameid": newGameKey,

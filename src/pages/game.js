@@ -1,6 +1,6 @@
 import React from 'react';
 
-var root = new Firebase("https://plump.firebaseio.com");
+var root = firebase.database().ref();
 var authData;
 var users;
 var loggedinuserRef;

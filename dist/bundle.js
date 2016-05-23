@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "1f832fc4094e411497aa"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "f940498cb5a18712e7b0"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -34789,6 +34789,7 @@
 	                  "currentBidder": 1,
 	                  "currentSuit": "",
 	                  "biddingMode": true,
+	                  "cardsOnTable": "",
 	                  "host": game.val().player1
 	                });
 	              }
@@ -35110,15 +35111,17 @@
 	    loggedinuserRef = usersRef.child(authData.uid);
 	    console.log("loggedinuserRef.uid: " + loggedinuserRef);
 	    var cards = [];
+	    var tableCards = [];
 	    _this.state = { uid: '', currentTable: '', currentRound: 10, deck: sortedDeck,
 	      player1cards: "", player2cards: "", player3cards: "", player4cards: "",
+	      player1uid: '', player2uid: '', player3uid: '', player4uid: '',
 	      player1bid: 0, player2bid: 0, player3bid: 0, player4bid: 0,
 	      player1score: 0, player2score: 0, player3score: 0, player4score: 0,
 	      player1cardPlayed: '', player2cardPlayed: '', player3cardPlayed: '', player4cardPlayed: '',
 	      player1tricksTaken: 0, player2tricksTaken: 0, player3tricksTaken: 0, player4tricksTaken: 0,
 	      currentDealer: 1, myCards: cards, myPlayerNumber: 1, playersTurn: 1,
 	      highestBid: 0, highestBidder: 1, biddingMode: true, currentBidder: 1,
-	      currentSuit: '' };
+	      currentSuit: '', myTrickCount: 0, myBid: 0, cardsOnTable: tableCards, currentTableAsString: "" };
 	    _this.dealNewHand = _this.dealNewHand.bind(_this);
 	    _this.getCardsForRound = _this.getCardsForRound.bind(_this);
 	    _this.shuffle = _this.shuffle.bind(_this);
@@ -35144,6 +35147,7 @@
 	        gamesInProgressRef.child(userData.currenttable).on("value", function (childsnapshot) {
 	          var gameData = childsnapshot.val();
 	          var newState = self.state;
+	          newState.currentTableAsString = gameData.cardsOnTable;
 	          newState.biddingMode = gameData.biddingMode;
 	          newState.currentBidder = gameData.currentBidder;
 	          newState.currentDealer = gameData.currentDealer;
@@ -35172,27 +35176,33 @@
 	          newState.player2tricksTaken = gameData.players.player2.tricksTaken;
 	          newState.player3tricksTaken = gameData.players.player3.tricksTaken;
 	          newState.player4tricksTaken = gameData.players.player4.tricksTaken;
+	          newState.player1uid = gameData.players.player1.uid;
+	          newState.player2uid = gameData.players.player2.uid;
+	          newState.player3uid = gameData.players.player3.uid;
+	          newState.player4uid = gameData.players.player4.uid;
 
 	          var tempCards = "";
 	          var tempCardArray = [];
 	          if (self.state.uid == gameData.players.player1.uid) {
 	            newState.myPlayerNumber = 1;
+	            newState.myBid = gameData.players.player1.currentBid;
+	            newState.myTrickCount = gameData.players.player1.tricksTaken;
 	            tempCards = gameData.players.player1.currentCards;
 	          } else if (self.state.uid == gameData.players.player2.uid) {
 	            newState.myPlayerNumber = 2;
+	            newState.myBid = gameData.players.player2.currentBid;
+	            newState.myTrickCount = gameData.players.player2.tricksTaken;
 	            tempCards = gameData.players.player2.currentCards;
 	          } else if (self.state.uid == gameData.players.player3.uid) {
 	            newState.myPlayerNumber = 3;
+	            newState.myBid = gameData.players.player3.currentBid;
+	            newState.myTrickCount = gameData.players.player3.tricksTaken;
 	            tempCards = gameData.players.player3.currentCards;
 	          } else if (self.state.uid == gameData.players.player4.uid) {
 	            newState.myPlayerNumber = 4;
+	            newState.myBid = gameData.players.player4.currentBid;
+	            newState.myTrickCount = gameData.players.player4.tricksTaken;
 	            tempCards = gameData.players.player4.currentCards;
-	          }
-	          // Om det är spelarens tur att buda så ska biddingBox visas
-	          if (newState.biddingMode == true && newState.currentBidder == newState.myPlayerNumber) {
-	            $("#biddingBox").show();
-	          } else {
-	            $("#biddingBox").hide();
 	          }
 
 	          for (var i = 0; i < tempCards.length; i += 2) {
@@ -35202,6 +35212,23 @@
 	            return ranks[right] - ranks[left]; // descending order
 	          });
 	          newState.myCards = tempCardArray;
+
+	          var tempCurrentTableArray = [];
+	          var tempC = gameData.cardsOnTable;
+	          for (var j = 0; j < tempC.length; j += 2) {
+	            tempCurrentTableArray.push(tempC.substring(j, j + 2));
+	          }
+	          newState.cardsOnTable = tempCurrentTableArray;
+
+	          $("#biddingBox").hide();
+	          // Om det är spelarens tur att buda så ska biddingBox visas
+	          if (newState.biddingMode == true && newState.currentBidder == newState.myPlayerNumber) {
+	            $("#bidInput").val("");
+	            $("#biddingBox").show();
+	          } else {
+	            $("#biddingBox").hide();
+	          }
+
 	          self.setState(newState);
 	        });
 	      });
@@ -35212,7 +35239,6 @@
 	  }, {
 	    key: 'dealNewHand',
 	    value: function dealNewHand(cardsCount) {
-	      console.log("dealNewHand.cardsCount: " + cardsCount);
 	      var allCardsForThisRound = this.getCardsForRound(cardsCount);
 	      // ge varje spelare sina kort.
 	      for (var i = 0; i < 4; i++) {
@@ -35225,7 +35251,6 @@
 	      // Skifta dealern ett steg. Först att buda är knappen + 1
 	      var newDealer = this.state.currentDealer % 4 + 1;
 	      var newBidder = newDealer % 4 + 1;
-	      console.log("newDealer: " + newDealer);
 	      gamesInProgressRef.child(this.state.currentTable).child('currentDealer').set(newDealer);
 	      gamesInProgressRef.child(this.state.currentTable).child('currentBidder').set(newBidder);
 	      // Detta krävs för att det helt säkert ska bli han om alla väljer 0.
@@ -35325,17 +35350,24 @@
 
 	        // gör alla uppdateringar
 	        if (validPlay) {
-	          console.log("Giltigt spel");
 	          myCards = myCards.replace(card, '');
 	          gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('currentCards').set(myCards);
 	          gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('cardPlayed').set(card);
+
+	          // Lägg till kortet till bordet
+	          var curCardsOnTable = this.state.currentTableAsString;
+	          console.log("curCardsOnTable är nu: " + curCardsOnTable);
+	          curCardsOnTable += card;
+	          console.log("Lägger till följande kort till bordet: " + card);
+	          console.log("nu däremot är curCardsOnTable: " + curCardsOnTable);
+	          gamesInProgressRef.child(this.state.currentTable).child('cardsOnTable').set(curCardsOnTable);
+
 	          if (firstOutToPlay) {
 	            gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set(card[1]);
 	          }
 	          // Nästa spelares tur.
 	          var myNumber = this.state.myPlayerNumber;
 	          if (this.trickOver(myNumber)) {
-	            console.log("trick is over");
 	            // kolla vem som fick sticket.
 	            var winnerOfTrick;
 
@@ -35345,26 +35377,17 @@
 	            var p4card = this.state.player4cardPlayed;
 
 	            if (this.state.myPlayerNumber == 1) {
-	              console.log("myPLauyer = 1");
-	              console.log(card + " " + p2card + " " + p3card + " " + p4card);
 	              winnerOfTrick = this.trickWinner(curSuit, card, p2card, p3card, p4card);
 	            } else if (this.state.myPlayerNumber == 2) {
-	              console.log("myPLauyer = 2");
-	              console.log(p1card + " " + card + " " + p3card + " " + p4card);
 	              winnerOfTrick = this.trickWinner(curSuit, p1card, card, p3card, p4card);
 	            } else if (this.state.myPlayerNumber == 3) {
-	              console.log("myPLauyer = 3");
-	              console.log(p1card + " " + p2card + " " + card + " " + p4card);
 	              winnerOfTrick = this.trickWinner(curSuit, p1card, p2card, card, p4card);
 	            } else if (this.state.myPlayerNumber == 4) {
-	              console.log("myPLauyer = 4");
-	              console.log(p1card + " " + p2card + " " + p3card + " " + card);
 	              winnerOfTrick = this.trickWinner(curSuit, p1card, p2card, p3card, card);
 	            }
 
 	            // räkna upp den spelarens stickräknare.
 	            var newTrickCount = 1;
-	            console.log("winnerOfTrick: " + winnerOfTrick);
 	            if (winnerOfTrick == 1) {
 	              newTrickCount += this.state.player1tricksTaken;
 	            } else if (winnerOfTrick == 2) {
@@ -35378,7 +35401,6 @@
 	            }
 	            // Kolla om hela rundan är slut
 	            if (myCards == "") {
-	              console.log("rundan är slut");
 	              // Kolla vem som klarade sig och ge dem poäng
 	              // måste hantera winnerOfTrick separat eftersom hen inte har uppdaterat sin data än, eller iaf kan man inte räkna med det.
 	              // kolla om player1 klarade sig
@@ -35492,38 +35514,86 @@
 	              // Flytta dealerknappen
 	              // Påbörja ny budrunda
 	              // kör dealNewHand();
-	              if (this.state.cardsCount == 2) {
+	              if (this.state.currentRound == 2) {
 	                // Spelet slut.
+	                // Ge spelarna sina poäng.
+	                var playerPointsArray = [];
+	                playerPointsArray.push({ uid: this.state.player1uid, score: this.state.player1score });
+	                playerPointsArray.push({ uid: this.state.player2uid, score: this.state.player2score });
+	                playerPointsArray.push({ uid: this.state.player3uid, score: this.state.player3score });
+	                playerPointsArray.push({ uid: this.state.player4uid, score: this.state.player4score });
+
+	                playerPointsArray.sort(function (a, b) {
+	                  return a.score - b.score;
+	                });
+
+	                var winnerOldScore = 0;
+	                var secondPlaceOldScore = 0;
+	                var thirdPlaceOldScore = 0;
+	                var loserOldScore = 0;
+	                // Uppdatera spelarnas score.
+	                usersRef.child(playerPointsArray[0].uid).once("value", function (snapshot) {
+	                  var userData = snapshot.val();
+	                  loserOldScore = userData.totalscore;
+	                  var loserNewScore = loserOldScore - 20;
+	                  if (loserNewScore < 0) {
+	                    // Man ska inte kunna ligga på minus bestämmer jag här och nu
+	                    loserNewScore = 0;
+	                  }
+	                  usersRef.child(playerPointsArray[0].uid).child("totalscore").set(loserNewScore);
+	                });
+	                usersRef.child(playerPointsArray[1].uid).once("value", function (snapshot) {
+	                  // har med denna ifall jag senare bestämmer mig för att ge 3an poäng som är skilt från 0
+	                  var userData = snapshot.val();
+	                  thirdPlaceOldScore = userData.totalscore;
+	                  var thirdPlaceNewScore = thirdPlaceOldScore;
+	                  // onödigt att göra updaten nu obviously
+	                  //usersRef.child(playerPointsArray[1].uid).child("totalscore").set(thirdPlaceNewScore);
+	                });
+	                usersRef.child(playerPointsArray[2].uid).once("value", function (snapshot) {
+	                  var userData = snapshot.val();
+	                  secondPlaceOldScore = userData.totalscore;
+	                  var secondPlaceMewScore = secondPlaceOldScore + 20;
+	                  usersRef.child(playerPointsArray[2].uid).child("totalscore").set(secondPlaceMewScore);
+	                });
+	                usersRef.child(playerPointsArray[3].uid).once("value", function (snapshot) {
+	                  var userData = snapshot.val();
+	                  winnerOldScore = userData.totalscore;
+	                  var winnerNewScore = winnerOldScore + 50;
+	                  usersRef.child(playerPointsArray[3].uid).child("totalscore").set(winnerNewScore);
+	                });
 	              } else {
-	                  var newRound = this.state.currentRound - 1;
-	                  gamesInProgressRef.child(this.state.currentTable).child("currentHand").set(newRound);
-	                  gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(0);
-	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("currentBid").set(0);
-	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("currentBid").set(0);
-	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("currentBid").set(0);
-	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("currentBid").set(0);
-	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("tricksTaken").set(0);
-	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("tricksTaken").set(0);
-	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("tricksTaken").set(0);
-	                  gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("tricksTaken").set(0);
-	                  this.dealNewHand(newRound);
-	                }
+	                var newRound = this.state.currentRound - 1;
+	                gamesInProgressRef.child(this.state.currentTable).child("currentHand").set(newRound);
+	                gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(0);
+	                gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("currentBid").set(0);
+	                gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("currentBid").set(0);
+	                gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("currentBid").set(0);
+	                gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("currentBid").set(0);
+	                gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("tricksTaken").set(0);
+	                gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("tricksTaken").set(0);
+	                gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("tricksTaken").set(0);
+	                gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("tricksTaken").set(0);
+	                this.dealNewHand(newRound);
+	              }
 	            } else {
 	              // rundan är inte slut (men sticket är slut)
-	              console.log('Setting new trick count for player' + winnerOfTrick + ". New value: " + newTrickCount + ".");
 	              gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + winnerOfTrick).child('tricksTaken').set(newTrickCount);
 	              gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(winnerOfTrick);
+	              // Låter korten vara kvar på bordet i 3 sekunder och tömmder det sedan
+	              var self = this;
+	              setTimeout(function () {
+	                gamesInProgressRef.child(self.state.currentTable).child("cardsOnTable").set("");
+	              }, 2200);
 	            }
 	            // ska göras oavsett
 	            gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("cardPlayed").set("");
 	            gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("cardPlayed").set("");
 	            gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("cardPlayed").set("");
 	            gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("cardPlayed").set("");
-
 	            gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set("");
 	          } else {
 	            // sticket är inte slut
-	            console.log("Sticket är inte slut");
 	            var nextPlayer = this.state.playersTurn % 4 + 1;
 	            gamesInProgressRef.child(this.state.currentTable).child("playersTurn").set(nextPlayer);
 	          }
@@ -35813,115 +35883,19 @@
 	        _react2.default.createElement(
 	          'p',
 	          null,
-	          'Spelare1s kort: ',
-	          this.state.player1cards
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare2s kort: ',
-	          this.state.player2cards
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare3s kort: ',
-	          this.state.player3cards
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare4s kort: ',
-	          this.state.player4cards
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'biddingMode: ',
-	          this.state.biddingMode ? "true" : "false"
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'playersTurn: ',
-	          this.state.playersTurn
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Dealer: ',
-	          this.state.currentDealer
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'currentBidder: ',
-	          this.state.currentBidder
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'currentSuit: ',
-	          this.state.currentSuit
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'highestBidder: ',
-	          this.state.highestBidder
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare1 bud: ',
-	          this.state.player1bid
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare2 bud: ',
-	          this.state.player2bid
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare3 bud: ',
-	          this.state.player3bid
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare4 bud: ',
-	          this.state.player4bid
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare1 stick: ',
-	          this.state.player1tricksTaken
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare2 stick: ',
-	          this.state.player2tricksTaken
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare3 stick: ',
-	          this.state.player3tricksTaken
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Spelare4 stick: ',
-	          this.state.player4tricksTaken
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
 	          this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Mitt bud: ',
+	          this.state.myBid
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'Antal stick jag tagit: ',
+	          this.state.myTrickCount
 	        ),
 	        _react2.default.createElement(
 	          'div',
@@ -35932,6 +35906,19 @@
 	            { onClick: this.bidButtonClicked.bind(this) },
 	            'Ok'
 	          )
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'cardsOnTable: ',
+	          this.state.cardsOnTable
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { id: 'tableDiv' },
+	          this.state.cardsOnTable.map(function (card, index) {
+	            return _react2.default.createElement('img', { key: index, src: "./images/cards/minifiedcards/" + card + ".png" });
+	          })
 	        ),
 	        _react2.default.createElement(
 	          'p',
