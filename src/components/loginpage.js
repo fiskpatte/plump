@@ -89,11 +89,12 @@ class LoginPage extends React.Component {
           };
         root.child('users').child(userid).set(newUser);
       }
+     browserHistory.push('/lobby');
     }).catch(function(error) {
-      console.error("Error signing in: " + error);
+      console.error("Error signing in: " + error.message);
     });
     // redirecta till inloggningssidan
-  //  browserHistory.push('/lobby');
+
   }
 
   signInWithEmailButtonClicked(){
@@ -111,6 +112,7 @@ class LoginPage extends React.Component {
 
   logoutButtonClicked(){
     root.unauth();
+
   }
 
   render() {
