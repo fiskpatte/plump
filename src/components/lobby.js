@@ -128,7 +128,7 @@ class Lobby extends React.Component{
                 "currentBidder": 1,
                 "currentSuit": "",
                 "biddingMode": true,
-                "cardsOnTable": "",
+                "currentTableAsString": "",
                 "host": game.val().player1
               });
             }

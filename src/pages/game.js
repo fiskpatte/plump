@@ -70,6 +70,7 @@ class Game extends React.Component {
   componentDidMount(){
     var self = this;
     auth = firebase.auth();
+
     loggedinuserRef = usersRef.child(auth.currentUser.uid);
     loggedinuserRef.on("value", function(snapshot){
       var userData = snapshot.val();
@@ -81,7 +82,7 @@ class Game extends React.Component {
       gamesInProgressRef.child(userData.currenttable).on("value", function(childsnapshot){
         var gameData = childsnapshot.val();
         var newState = self.state;
-        newState.currentTableAsString = gameData.cardsOnTable;
+        newState.currentTableAsString = gameData.currentTableAsString;
         newState.biddingMode    = gameData.biddingMode;
         newState.currentBidder  = gameData.currentBidder;
         newState.currentDealer  = gameData.currentDealer;
@@ -148,7 +149,7 @@ class Game extends React.Component {
         newState.myCards = tempCardArray;
 
         var tempCurrentTableArray = [];
-        var tempC = gameData.cardsOnTable;
+        var tempC = gameData.currentTableAsString;
         for(var j = 0; j < tempC.length; j += 2){
           tempCurrentTableArray.push(tempC.substring(j, j+2));
         }
@@ -240,7 +241,7 @@ class Game extends React.Component {
 
   // Här tar jag bort kortet man klickade på och uppdaterar db.
   cardClicked(card){
-    if(this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false){
+    if(this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false && this.state.currentTableAsString.length < 8){
       console.log("Går in i cardClicked");
       var validPlay = false;
       var curSuit = this.state.currentSuit;
@@ -283,7 +284,7 @@ class Game extends React.Component {
         curCardsOnTable += card;
         console.log("Lägger till följande kort till bordet: " + card);
         console.log("nu däremot är curCardsOnTable: " + curCardsOnTable);
-        gamesInProgressRef.child(this.state.currentTable).child('cardsOnTable').set(curCardsOnTable);
+        gamesInProgressRef.child(this.state.currentTable).child('currentTableAsString').set(curCardsOnTable);
 
         if(firstOutToPlay){
           gamesInProgressRef.child(this.state.currentTable).child('currentSuit').set(card[1]);
@@ -293,7 +294,6 @@ class Game extends React.Component {
         if(this.trickOver(myNumber)){
           // kolla vem som fick sticket.
           var winnerOfTrick;
-
           var p1card = this.state.player1cardPlayed;
           var p2card = this.state.player2cardPlayed;
           var p3card = this.state.player3cardPlayed;
@@ -508,7 +508,7 @@ class Game extends React.Component {
             gamesInProgressRef.child(this.state.currentTable).child('playersTurn').set(winnerOfTrick);
             // Låter korten vara kvar på bordet i 3 sekunder och tömmder det sedan
             var self = this;
-            setTimeout(function(){gamesInProgressRef.child(self.state.currentTable).child("cardsOnTable").set("");},2200);
+            setTimeout(function(){gamesInProgressRef.child(self.state.currentTable).child("currentTableAsString").set("");},2200);
           }
           // ska göras oavsett
           gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("cardPlayed").set("");
@@ -690,7 +690,7 @@ class Game extends React.Component {
       <div>
         <p>THIS IS THE GAME</p>
         <button onClick={this.debugKnapp.bind(this)}>Starta spelet</button>
-        <p>{this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"}</p>
+
         <p>{this.state.biddingMode == true ? "biddingMode = true" : "biddingMode = false"}</p>
         <p>myPlayerNumber = {this.state.myPlayerNumber}</p>
         <p>this.state.uid = {this.state.uid}</p>
@@ -701,13 +701,13 @@ class Game extends React.Component {
           <input id="bidInput" type="text" placeholder="Lägg ett bud" />
           <button onClick={this.bidButtonClicked.bind(this)}>Ok</button>
         </div>
-        <p>cardsOnTable: {this.state.cardsOnTable}</p>
+        <p>currentTableAsString: {this.state.currentTableAsString}</p>
         <div id="tableDiv">
           {this.state.cardsOnTable.map((card, index) => (
             <img key={index} src={"./images/cards/minifiedcards/"+card+".png"} />
           ))}
         </div>
-        <p>Mina kort: </p>
+        <p>{this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"}</p>
         {this.state.myCards.map((card, index) => (
           <img key={index} className="cardImage" src={"./images/cards/minifiedcards/"+card+".png"} onClick={this.cardClicked.bind(this, card)}/>
         ))}
