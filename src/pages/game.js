@@ -240,7 +240,7 @@ class Game extends React.Component {
 
   // Här tar jag bort kortet man klickade på och uppdaterar db.
   cardClicked(card){
-    if(this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false){
+    if(this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false && this.state.cardsOnTable.length < 4){
       console.log("Går in i cardClicked");
       var validPlay = false;
       var curSuit = this.state.currentSuit;
