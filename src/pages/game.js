@@ -2,6 +2,7 @@ import React from 'react';
 
 var root = firebase.database().ref();
 var authData;
+var auth = firebase.auth();
 var users;
 var loggedinuserRef;
 var currentGameRef;
@@ -44,7 +45,7 @@ class Game extends React.Component {
     "qc" : 50, "qh" : 37, "qs" : 24, "qd" : 11,
     "kc" : 51, "kh" : 38, "ks" : 25, "kd" : 12
     };
-    authData = root.getAuth();
+    //authData = root.getAuth();
     loggedinuserRef = usersRef.child(authData.uid);
     console.log("loggedinuserRef.uid: " + loggedinuserRef);
     const cards = [];

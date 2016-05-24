@@ -37,6 +37,13 @@ class LoginPage extends React.Component {
         console.error("Sign out error: ", error);
       });
     }
+
+    auth.onAuthStateChanged(function(user) {
+      if(user) {
+
+        browserHistory.push('/lobby');
+      }
+    });
   }
 
   // componentDidMount(){
@@ -73,6 +80,7 @@ class LoginPage extends React.Component {
       for(var user in self.state.users){
         if(self.state.users[user].uid === uid){
           // usern fanns redan
+          console.log("Han fanns redan");
           userExists = true;
         }
       }
@@ -80,16 +88,17 @@ class LoginPage extends React.Component {
         // skapa ny användare i db
         const userid = uid;
         //var displayName = authData.facebook.displayName;
-        var displayName = "dummyname";
+        var displayName = "dummy6name";
         const username = displayName.substr(0, displayName.indexOf(" "));
         const newUser = {
-            "displayname": username,
+            "displayname": displayName,
             "totalscore": 0,
-            "currenttable": ''
+            "currenttable": '',
+            "uid": uid
           };
         root.child('users').child(userid).set(newUser);
       }
-     browserHistory.push('/lobby');
+      // browserHistory.push('/lobby');
     }).catch(function(error) {
       console.error("Error signing in: " + error.message);
     });
@@ -100,10 +109,11 @@ class LoginPage extends React.Component {
   signInWithEmailButtonClicked(){
     var inputedEmail = $('#emailInputField').val();
     var inputedPassword = $('#passwordInputField').val();
+    var signedIn = false;
     auth.signInWithEmailAndPassword(inputedEmail, inputedPassword).catch(function(error){
       console.error("Login with email/password failed: " + error.message);
     });
-  //  browserHistory.push('/lobby');
+    browserHistory.push('/lobby');
   }
 
   signupButtonClicked(){
@@ -111,7 +121,7 @@ class LoginPage extends React.Component {
   }
 
   logoutButtonClicked(){
-    root.unauth();
+    auth.signOut();
 
   }
 

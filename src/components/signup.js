@@ -13,6 +13,10 @@ class SignUp extends React.Component {
 
   componentDidMount(){
     var self = this;
+    // Det här är temporärt. När man kommer hit ska man ju aldrig vara inloggad.
+    // Först när man skapar en användare så loggas man in, och då körs denna kod.
+    // Den känns ej intiutiv. Kommer åtgärdas när jag kommer på hur jag får tag på
+    // datan för en användare som precis skapats.
     auth.onAuthStateChanged(function(user) {
       if(user) {
         // spara ner den nya användaren.
@@ -20,9 +24,11 @@ class SignUp extends React.Component {
         const newUser = {
             "displayname": self.state.displayName,
             "totalscore": 0,
-            "currenttable": ''
+            "currenttable": '',
+            "uid": userid
           };
         root.child('users').child(userid).set(newUser);
+        browserHistory.push('/lobby');
       } else {
         // Gör inte ett JÄVLA SKIT.
       }
@@ -30,9 +36,9 @@ class SignUp extends React.Component {
   }
 
   componentWillUnmount(){
-    auth.off();
+    root.off();
+    usersRef.off();
   }
-
 
   submitButtonClicked(){
     var inputedEmail = $('#emailInputField').val();
@@ -41,7 +47,6 @@ class SignUp extends React.Component {
     var newState = this.state;
     newState.displayName = inputedUsername;
     this.setState(newState);
-    var error = false;
 
     auth.createUserWithEmailAndPassword(inputedEmail, inputedPassword)
     .catch(function(error) {
@@ -52,7 +57,6 @@ class SignUp extends React.Component {
   render(){
     return (
       <div>
-
           <input id="emailInputField" type="email" placeholder="Ange din emailadress" required/>
           <input id="usernameInputField" type="text" placeholder="Välj ett användarnamn" required />
           <input id="passwordInputField" type="password" placeholder="Välj ett lösenord" required/>
