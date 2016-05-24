@@ -50,7 +50,7 @@ class Game extends React.Component {
     this.state = {uid: '', currentTable : '', currentRound : 10, deck : sortedDeck,
       player1cards : "", player2cards : "", player3cards : "", player4cards : "",
       player1uid: '', player2uid: '', player3uid: '', player4uid: '',
-      player1bid : 0, player2bid : 0, player3bid : 0, player4bid : 0,
+      player1bid : -1, player2bid : -1, player3bid : -1, player4bid : -1,
       player1score: 0, player2score: 0, player3score: 0, player4score: 0,
       player1cardPlayed: '', player2cardPlayed: '', player3cardPlayed: '', player4cardPlayed: '',
       player1tricksTaken: 0, player2tricksTaken: 0, player3tricksTaken: 0, player4tricksTaken: 0,
@@ -557,10 +557,10 @@ class Game extends React.Component {
               var newRound = this.state.currentRound - 1;
               gamesInProgressRef.child(this.state.currentTable).child("currentHand").set(newRound);
               gamesInProgressRef.child(this.state.currentTable).child('highestBid').set(0);
-              gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("currentBid").set(0);
-              gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("currentBid").set(0);
-              gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("currentBid").set(0);
-              gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("currentBid").set(0);
+              gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("currentBid").set(-1);
+              gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("currentBid").set(-1);
+              gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("currentBid").set(-1);
+              gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("currentBid").set(-1);
               gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("tricksTaken").set(0);
               gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("tricksTaken").set(0);
               gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("tricksTaken").set(0);
@@ -762,73 +762,73 @@ class Game extends React.Component {
             </tr>
             <tr>
               <td>10</td>
-              <td>{this.state.currentRound == 10 ? this.state.player1bid : (this.state.currentRound < 10 ? this.state.round10p1 : "")}</td>
-              <td>{this.state.currentRound == 10 ? this.state.player2bid : (this.state.currentRound < 10 ? this.state.round10p2 : "")}</td>
-              <td>{this.state.currentRound == 10 ? this.state.player3bid : (this.state.currentRound < 10 ? this.state.round10p3 : "")}</td>
-              <td>{this.state.currentRound == 10 ? this.state.player4bid : (this.state.currentRound < 10 ? this.state.round10p4 : "")}</td>
+              <td>{this.state.currentRound == 10 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 10 ? this.state.round10p1 : "")}</td>
+              <td>{this.state.currentRound == 10 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 10 ? this.state.round10p2 : "")}</td>
+              <td>{this.state.currentRound == 10 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 10 ? this.state.round10p3 : "")}</td>
+              <td>{this.state.currentRound == 10 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 10 ? this.state.round10p4 : "")}</td>
             </tr>
             <tr>
               <td>9</td>
-              <td>{this.state.currentRound == 9 ? this.state.player1bid : (this.state.currentRound < 9 ? this.state.round9p1 : "")}</td>
-              <td>{this.state.currentRound == 9 ? this.state.player2bid : (this.state.currentRound < 9 ? this.state.round9p2 : "")}</td>
-              <td>{this.state.currentRound == 9 ? this.state.player3bid : (this.state.currentRound < 9 ? this.state.round9p3 : "")}</td>
-              <td>{this.state.currentRound == 9 ? this.state.player4bid : (this.state.currentRound < 9 ? this.state.round9p4 : "")}</td>
+              <td>{this.state.currentRound == 9 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 9 ? this.state.round9p1 : "")}</td>
+              <td>{this.state.currentRound == 9 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 9 ? this.state.round9p2 : "")}</td>
+              <td>{this.state.currentRound == 9 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 9 ? this.state.round9p3 : "")}</td>
+              <td>{this.state.currentRound == 9 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 9 ? this.state.round9p4 : "")}</td>
             </tr>
             <tr>
               <td>8</td>
-              <td>{this.state.currentRound == 8 ? this.state.player1bid : (this.state.currentRound < 8 ? this.state.round8p1 : "")}</td>
-              <td>{this.state.currentRound == 8 ? this.state.player2bid : (this.state.currentRound < 8 ? this.state.round8p2 : "")}</td>
-              <td>{this.state.currentRound == 8 ? this.state.player3bid : (this.state.currentRound < 8 ? this.state.round8p3 : "")}</td>
-              <td>{this.state.currentRound == 8 ? this.state.player4bid : (this.state.currentRound < 8 ? this.state.round8p4 : "")}</td>
+              <td>{this.state.currentRound == 8 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 8 ? this.state.round8p1 : "")}</td>
+              <td>{this.state.currentRound == 8 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 8 ? this.state.round8p2 : "")}</td>
+              <td>{this.state.currentRound == 8 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 8 ? this.state.round8p3 : "")}</td>
+              <td>{this.state.currentRound == 8 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 8 ? this.state.round8p4 : "")}</td>
             </tr>
             <tr>
               <td>7</td>
-              <td>{this.state.currentRound == 7 ? this.state.player1bid : (this.state.currentRound < 7 ? this.state.round7p1 : "")}</td>
-              <td>{this.state.currentRound == 7 ? this.state.player2bid : (this.state.currentRound < 7 ? this.state.round7p2 : "")}</td>
-              <td>{this.state.currentRound == 7 ? this.state.player3bid : (this.state.currentRound < 7 ? this.state.round7p3 : "")}</td>
-              <td>{this.state.currentRound == 7 ? this.state.player4bid : (this.state.currentRound < 7 ? this.state.round7p4 : "")}</td>
+              <td>{this.state.currentRound == 7 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 7 ? this.state.round7p1 : "")}</td>
+              <td>{this.state.currentRound == 7 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 7 ? this.state.round7p2 : "")}</td>
+              <td>{this.state.currentRound == 7 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 7 ? this.state.round7p3 : "")}</td>
+              <td>{this.state.currentRound == 7 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 7 ? this.state.round7p4 : "")}</td>
             </tr>
             <tr>
               <td>6</td>
-              <td>{this.state.currentRound == 6 ? this.state.player1bid : (this.state.currentRound < 6 ? this.state.round6p1 : "")}</td>
-              <td>{this.state.currentRound == 6 ? this.state.player2bid : (this.state.currentRound < 6 ? this.state.round6p2 : "")}</td>
-              <td>{this.state.currentRound == 6 ? this.state.player3bid : (this.state.currentRound < 6 ? this.state.round6p3 : "")}</td>
-              <td>{this.state.currentRound == 6 ? this.state.player4bid : (this.state.currentRound < 6 ? this.state.round6p4 : "")}</td>
+              <td>{this.state.currentRound == 6 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 6 ? this.state.round6p1 : "")}</td>
+              <td>{this.state.currentRound == 6 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 6 ? this.state.round6p2 : "")}</td>
+              <td>{this.state.currentRound == 6 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 6 ? this.state.round6p3 : "")}</td>
+              <td>{this.state.currentRound == 6 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 6 ? this.state.round6p4 : "")}</td>
             </tr>
             <tr>
               <td>5</td>
-              <td>{this.state.currentRound == 5 ? this.state.player1bid : (this.state.currentRound < 5 ? this.state.round5p1 : "")}</td>
-              <td>{this.state.currentRound == 5 ? this.state.player2bid : (this.state.currentRound < 5 ? this.state.round5p2 : "")}</td>
-              <td>{this.state.currentRound == 5 ? this.state.player3bid : (this.state.currentRound < 5 ? this.state.round5p3 : "")}</td>
-              <td>{this.state.currentRound == 5 ? this.state.player4bid : (this.state.currentRound < 5 ? this.state.round5p4 : "")}</td>
+              <td>{this.state.currentRound == 5 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 5 ? this.state.round5p1 : "")}</td>
+              <td>{this.state.currentRound == 5 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 5 ? this.state.round5p2 : "")}</td>
+              <td>{this.state.currentRound == 5 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 5 ? this.state.round5p3 : "")}</td>
+              <td>{this.state.currentRound == 5 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 5 ? this.state.round5p4 : "")}</td>
             </tr>
             <tr>
               <td>4</td>
-              <td>{this.state.currentRound == 4 ? this.state.player1bid : (this.state.currentRound < 4 ? this.state.round4p1 : "")}</td>
-              <td>{this.state.currentRound == 4 ? this.state.player2bid : (this.state.currentRound < 4 ? this.state.round4p2 : "")}</td>
-              <td>{this.state.currentRound == 4 ? this.state.player3bid : (this.state.currentRound < 4 ? this.state.round4p3 : "")}</td>
-              <td>{this.state.currentRound == 4 ? this.state.player4bid : (this.state.currentRound < 4 ? this.state.round4p4 : "")}</td>
+              <td>{this.state.currentRound == 4 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 4 ? this.state.round4p1 : "")}</td>
+              <td>{this.state.currentRound == 4 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 4 ? this.state.round4p2 : "")}</td>
+              <td>{this.state.currentRound == 4 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 4 ? this.state.round4p3 : "")}</td>
+              <td>{this.state.currentRound == 4 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 4 ? this.state.round4p4 : "")}</td>
             </tr>
             <tr>
               <td>3</td>
-              <td>{this.state.currentRound == 3 ? this.state.player1bid : (this.state.currentRound < 3 ? this.state.round3p1 : "")}</td>
-              <td>{this.state.currentRound == 3 ? this.state.player2bid : (this.state.currentRound < 3 ? this.state.round3p2 : "")}</td>
-              <td>{this.state.currentRound == 3 ? this.state.player3bid : (this.state.currentRound < 3 ? this.state.round3p3 : "")}</td>
-              <td>{this.state.currentRound == 3 ? this.state.player4bid : (this.state.currentRound < 3 ? this.state.round3p4 : "")}</td>
+              <td>{this.state.currentRound == 3 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 3 ? this.state.round3p1 : "")}</td>
+              <td>{this.state.currentRound == 3 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 3 ? this.state.round3p2 : "")}</td>
+              <td>{this.state.currentRound == 3 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 3 ? this.state.round3p3 : "")}</td>
+              <td>{this.state.currentRound == 3 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 3 ? this.state.round3p4 : "")}</td>
             </tr>
             <tr>
               <td>2</td>
-              <td>{this.state.currentRound == 2 ? this.state.player1bid : (this.state.currentRound < 2 ? this.state.round2p1 : "")}</td>
-              <td>{this.state.currentRound == 2 ? this.state.player2bid : (this.state.currentRound < 2 ? this.state.round2p2 : "")}</td>
-              <td>{this.state.currentRound == 2 ? this.state.player3bid : (this.state.currentRound < 2 ? this.state.round2p3 : "")}</td>
-              <td>{this.state.currentRound == 2 ? this.state.player4bid : (this.state.currentRound < 2 ? this.state.round2p4 : "")}</td>
+              <td>{this.state.currentRound == 2 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 2 ? this.state.round2p1 : "")}</td>
+              <td>{this.state.currentRound == 2 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 2 ? this.state.round2p2 : "")}</td>
+              <td>{this.state.currentRound == 2 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 2 ? this.state.round2p3 : "")}</td>
+              <td>{this.state.currentRound == 2 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 2 ? this.state.round2p4 : "")}</td>
             </tr>
             <tr>
               <td>Totalt</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td>{this.state.player1score}</td>
+              <td>{this.state.player1score}</td>
+              <td>{this.state.player1score}</td>
+              <td>{this.state.player1score}</td>
             </tr>
           </table>
         </div>

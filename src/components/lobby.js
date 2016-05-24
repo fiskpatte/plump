@@ -90,7 +90,7 @@ class Lobby extends React.Component{
                   "player1" : {
                     "uid": game.val().player1,
                     "host": true,
-                    "currentBid": 0,
+                    "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
                     "score": 0
@@ -98,7 +98,7 @@ class Lobby extends React.Component{
                   "player2" : {
                     "uid": game.val().player2,
                     "host": false,
-                    "currentBid": 0,
+                    "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
                     "score": 0
@@ -106,7 +106,7 @@ class Lobby extends React.Component{
                   "player3" : {
                     "uid": game.val().player3,
                     "host": false,
-                    "currentBid": 0,
+                    "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
                     "score": 0
@@ -114,7 +114,7 @@ class Lobby extends React.Component{
                   "player4" : {
                     "uid": game.val().player4,
                     "host": false,
-                    "currentBid": 0,
+                    "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
                     "score": 0
