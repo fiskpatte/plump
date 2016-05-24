@@ -230,19 +230,6 @@ class Game extends React.Component {
     gamesInProgressRef.child(this.state.currentTable).child('highestBidder').set(newBidder);
     // Först ska man buda.
     gamesInProgressRef.child(this.state.currentTable).child('biddingMode').set(true);
-
-    // BUDGIVNING
-    // Ha en div som innehåller budgivningsmekanismen. Visa den när spelet är i budläge.
-    // Sätt en timer som timar ut efter ~20 sekunder. Har man inte valt tills dess så
-    // autoväljs något åt en.
-
-    // Varför har jag kommenterat bort detta?
-    // var nextRound = this.state.currentRound - 1;
-    // if(this.state.currentRound >= 2){
-    //  gamesInProgressRef.child(this.state.currentTable).child('currentRound').set(nextRound);
-    // } else {
-    //  endTheGame();
-    // }
   }
 
   getCardsForRound(cardsPerPerson){
@@ -608,11 +595,7 @@ class Game extends React.Component {
   }
 
   trickWinner(suit, player1card, player2card, player3card, player4card){
-    console.log("går in i trickWinner");
-    console.log("player1card: " + player1card);
-    console.log("player2card: " + player2card);
-    console.log("player3card: " + player3card);
-    console.log("player4card: " + player4card);
+
     var check1 = player1card[1] == suit ? true : false;
     var check2 = player2card[1] == suit ? true : false;
     var check3 = player3card[1] == suit ? true : false;
@@ -849,13 +832,7 @@ class Game extends React.Component {
             </tr>
           </table>
         </div>
-        <p>THIS IS THE GAME</p>
         <button onClick={this.debugKnapp.bind(this)}>Starta spelet</button>
-
-        <p>{this.state.biddingMode == true ? "biddingMode = true" : "biddingMode = false"}</p>
-        <p>myPlayerNumber = {this.state.myPlayerNumber}</p>
-        <p>this.state.uid = {this.state.uid}</p>
-        <p>currentBidder = {this.state.currentBidder}</p>
         <p>Mitt bud: {this.state.myBid}</p>
         <p>Antal stick jag tagit: {this.state.myTrickCount}</p>
         <div id="biddingBox">

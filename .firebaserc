@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "plump"
+    "default": "plump",
+    "plump": "project-1770433111229031520"
   }
 }
