@@ -1,8 +1,7 @@
 import React from 'react';
 
 var root = firebase.database().ref();
-var authData;
-var auth = firebase.auth();
+var auth;
 var users;
 var loggedinuserRef;
 var currentGameRef;
@@ -45,9 +44,7 @@ class Game extends React.Component {
     "qc" : 50, "qh" : 37, "qs" : 24, "qd" : 11,
     "kc" : 51, "kh" : 38, "ks" : 25, "kd" : 12
     };
-    //authData = root.getAuth();
-    loggedinuserRef = usersRef.child(authData.uid);
-    console.log("loggedinuserRef.uid: " + loggedinuserRef);
+
     const cards = [];
     const tableCards = [];
     this.state = {uid: '', currentTable : '', currentRound : 10, deck : sortedDeck,
@@ -72,10 +69,12 @@ class Game extends React.Component {
 
   componentDidMount(){
     var self = this;
+    auth = firebase.auth();
+    loggedinuserRef = usersRef.child(auth.currentUser.uid);
     loggedinuserRef.on("value", function(snapshot){
       var userData = snapshot.val();
       var newState = self.state;
-      newState.uid = snapshot.key();
+      newState.uid = snapshot.key;
       newState.currentTable = userData.currenttable;
       newState.username = userData.displayname;
       self.setState(newState);
@@ -140,7 +139,6 @@ class Game extends React.Component {
           tempCards = gameData.players.player4.currentCards;
         }
 
-
         for(var i = 0; i < tempCards.length; i += 2){
           tempCardArray.push(tempCards.substring(i, i+2));
         }
@@ -196,6 +194,7 @@ class Game extends React.Component {
     // Sätt en timer som timar ut efter ~20 sekunder. Har man inte valt tills dess så
     // autoväljs något åt en.
 
+    // Varför har jag kommenterat bort detta?
     // var nextRound = this.state.currentRound - 1;
     // if(this.state.currentRound >= 2){
     //  gamesInProgressRef.child(this.state.currentTable).child('currentRound').set(nextRound);
@@ -241,7 +240,7 @@ class Game extends React.Component {
 
   // Här tar jag bort kortet man klickade på och uppdaterar db.
   cardClicked(card){
-    if(this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false && this.state.cardsOnTable.length < 4){
+    if(this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false){
       console.log("Går in i cardClicked");
       var validPlay = false;
       var curSuit = this.state.currentSuit;
@@ -692,6 +691,10 @@ class Game extends React.Component {
         <p>THIS IS THE GAME</p>
         <button onClick={this.debugKnapp.bind(this)}>Starta spelet</button>
         <p>{this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"}</p>
+        <p>{this.state.biddingMode == true ? "biddingMode = true" : "biddingMode = false"}</p>
+        <p>myPlayerNumber = {this.state.myPlayerNumber}</p>
+        <p>this.state.uid = {this.state.uid}</p>
+        <p>currentBidder = {this.state.currentBidder}</p>
         <p>Mitt bud: {this.state.myBid}</p>
         <p>Antal stick jag tagit: {this.state.myTrickCount}</p>
         <div id="biddingBox">

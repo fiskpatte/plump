@@ -195,6 +195,7 @@ class Lobby extends React.Component{
       <div>
         <p>{this.state.username}</p>
         <p>Poäng: {this.state.userTotalScore}</p>
+        <p>inloggad uid: {this.state.uid}</p>
         <button onClick={this.newGameButtonClicked.bind(this)}>NYTT SPEL</button>
         <p>Öppna spel:</p>
         {this.state.openGames.map((openGame, index) => (

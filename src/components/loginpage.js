@@ -38,22 +38,8 @@ class LoginPage extends React.Component {
       });
     }
 
-    auth.onAuthStateChanged(function(user) {
-      if(user) {
 
-        browserHistory.push('/lobby');
-      }
-    });
   }
-
-  // componentDidMount(){
-  //   var user = firebase.auth().currentUser;
-  //   if(user) {
-  //     console.log(user.uid);
-  //   } else {
-  //     console.log("Ej inloggad");
-  //   }
-  // }
 
   debugAuth(){
     var user = firebase.auth().currentUser;
@@ -74,6 +60,7 @@ class LoginPage extends React.Component {
     var provider = new firebase.auth.FacebookAuthProvider();
     auth.signInWithPopup(provider).then(function(result){
       // User signed in
+
       var uid = result.user.uid;
       console.log("Signed in with uid: " + uid);
       var userExists = false;
@@ -98,7 +85,7 @@ class LoginPage extends React.Component {
           };
         root.child('users').child(userid).set(newUser);
       }
-      // browserHistory.push('/lobby');
+      browserHistory.push('/lobby');
     }).catch(function(error) {
       console.error("Error signing in: " + error.message);
     });
@@ -110,10 +97,14 @@ class LoginPage extends React.Component {
     var inputedEmail = $('#emailInputField').val();
     var inputedPassword = $('#passwordInputField').val();
     var signedIn = false;
-    auth.signInWithEmailAndPassword(inputedEmail, inputedPassword).catch(function(error){
+    auth.signInWithEmailAndPassword(inputedEmail, inputedPassword).then(function(result){
+      console.log("Kom in här");
+      if(result != null){
+        browserHistory.push('/lobby');
+      }
+    }).catch(function(error){
       console.error("Login with email/password failed: " + error.message);
     });
-    browserHistory.push('/lobby');
   }
 
   signupButtonClicked(){

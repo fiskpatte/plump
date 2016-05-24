@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "f940498cb5a18712e7b0"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "b87692fadc2c246ae555"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -34313,8 +34313,9 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var root = new Firebase("https://plump.firebaseio.com");
+	var root = firebase.database().ref();
 	var usersRef = root.child('users');
+	var auth = firebase.auth();
 	// Om man redan är inloggad ska man redirectas till loggedInPage
 
 	var LoginPage = function (_React$Component) {
@@ -34347,16 +34348,25 @@
 	    key: 'componentWillMount',
 	    value: function componentWillMount() {
 	      var self = this;
-	      var authData = root.getAuth();
-	      if (authData) {
+	      var signedInUser = firebase.User;
+	      if (signedInUser) {
 	        console.log('Inloggad innan mount. Försöker logga ut.');
-	        root.unauth();
+	        auth.signOut().then(function () {
+	          console.log("Signed out");
+	        }, function (error) {
+	          console.error("Sign out error: ", error);
+	        });
 	      }
 	    }
 	  }, {
 	    key: 'debugAuth',
 	    value: function debugAuth() {
-	      console.log(root.authData.uid);
+	      var user = firebase.auth().currentUser;
+	      if (user) {
+	        console.log(user.uid);
+	      } else {
+	        console.log("Ej inloggad");
+	      }
 	    }
 	  }, {
 	    key: 'componentWillUnmount',
@@ -34368,52 +34378,53 @@
 	    key: 'loginWithFacebookButtonClicked',
 	    value: function loginWithFacebookButtonClicked() {
 	      var self = this;
-	      root.authWithOAuthPopup("facebook", function (error, authData) {
-	        if (error) {
-	          console.log("Login failed", error);
-	        } else {
-	          // kolla om usern redan finns
-	          // om inte, skapa ny user.
-	          var userExists = false;
-	          var uid = authData.uid;
-	          for (var user in self.state.users) {
-	            if (self.state.users[user].uid === uid) {
-	              // usern fanns redan
-	              userExists = true;
-	            }
+	      var provider = new firebase.auth.FacebookAuthProvider();
+	      auth.signInWithPopup(provider).then(function (result) {
+	        // User signed in
+
+	        var uid = result.user.uid;
+	        console.log("Signed in with uid: " + uid);
+	        var userExists = false;
+	        for (var user in self.state.users) {
+	          if (self.state.users[user].uid === uid) {
+	            // usern fanns redan
+	            console.log("Han fanns redan");
+	            userExists = true;
 	          }
-	          if (!userExists) {
-	            // skapa ny användare i db
-	            var userid = authData.uid;
-	            var displayName = authData.facebook.displayName;
-	            var username = displayName.substr(0, displayName.indexOf(" "));
-	            var newUser = {
-	              "displayname": username,
-	              "totalscore": 0,
-	              "currenttable": ''
-	            };
-	            root.child('users').child(userid).set(newUser);
-	          }
-	          // redirecta till inloggningssidan
-	          _reactRouter.browserHistory.push('/lobby');
 	        }
+	        if (!userExists) {
+	          // skapa ny användare i db
+	          var userid = uid;
+	          //var displayName = authData.facebook.displayName;
+	          var displayName = "dummy6name";
+	          var username = displayName.substr(0, displayName.indexOf(" "));
+	          var newUser = {
+	            "displayname": displayName,
+	            "totalscore": 0,
+	            "currenttable": '',
+	            "uid": uid
+	          };
+	          root.child('users').child(userid).set(newUser);
+	        }
+	        _reactRouter.browserHistory.push('/lobby');
+	      }).catch(function (error) {
+	        console.error("Error signing in: " + error.message);
 	      });
+	      // redirecta till inloggningssidan
 	    }
 	  }, {
 	    key: 'signInWithEmailButtonClicked',
 	    value: function signInWithEmailButtonClicked() {
 	      var inputedEmail = $('#emailInputField').val();
 	      var inputedPassword = $('#passwordInputField').val();
-	      root.authWithPassword({
-	        email: inputedEmail,
-	        password: inputedPassword
-	      }, function (error, authData) {
-	        if (error) {
-	          console.log("Login Failed!", error);
-	        } else {
-	          console.log("Authenticated successfully with payload:", authData);
+	      var signedIn = false;
+	      auth.signInWithEmailAndPassword(inputedEmail, inputedPassword).then(function (result) {
+	        console.log("Kom in här");
+	        if (result != null) {
 	          _reactRouter.browserHistory.push('/lobby');
 	        }
+	      }).catch(function (error) {
+	        console.error("Login with email/password failed: " + error.message);
 	      });
 	    }
 	  }, {
@@ -34424,7 +34435,7 @@
 	  }, {
 	    key: 'logoutButtonClicked',
 	    value: function logoutButtonClicked() {
-	      root.unauth();
+	      auth.signOut();
 	    }
 	  }, {
 	    key: 'render',
@@ -34667,12 +34678,12 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var root = new Firebase("https://plump.firebaseio.com");
-	var authData;
-	var users;
-	var loggedinuserRef;
+	var root = firebase.database().ref();
 	var usersRef = root.child('users');
 	var openGamesRef = root.child('opengames');
+	var auth = firebase.auth();
+	var users;
+	var loggedinuserRef;
 
 	var Lobby = function (_React$Component) {
 	  _inherits(Lobby, _React$Component);
@@ -34680,10 +34691,10 @@
 	  function Lobby(props) {
 	    _classCallCheck(this, Lobby);
 
+	    // myFuckingUid = auth.currentUser;
+
 	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Lobby).call(this, props));
 
-	    authData = root.getAuth();
-	    loggedinuserRef = root.child('users').child(authData.uid);
 	    _this.state = { uid: '', username: '', userTotalScore: 0, openGames: [], currentTable: '' };
 	    return _this;
 	  }
@@ -34692,15 +34703,21 @@
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      var self = this;
+	      auth = firebase.auth();
+	      console.log("Användare inloggad i lobby: " + auth.currentUser.uid);
+	      loggedinuserRef = usersRef.child(auth.currentUser.uid);
 	      loggedinuserRef.on("value", function (snapshot) {
 	        var userData = snapshot.val();
 	        var newState = self.state;
-	        newState.uid = snapshot.key();
+	        newState.uid = snapshot.key;
 	        newState.currentTable = userData.currenttable;
 	        newState.username = userData.displayname;
 	        newState.userTotalScore = userData.totalscore;
 	        self.setState(newState);
 	      });
+
+	      //
+	      //
 	      openGamesRef.on('value', function (snapshot) {
 	        // radera alla games där det inte sitter någon
 	        var gamesToRemove = [];
@@ -34718,7 +34735,7 @@
 	            }
 	          }
 	          if (game.val().player1 == "" && game.val().player2 == "" && game.val().player3 == "" && game.val().player4 == "") {
-	            gamesToRemove.push(game.key());
+	            gamesToRemove.push(game.key);
 	          }
 	        });
 
@@ -34823,7 +34840,7 @@
 	    value: function newGameButtonClicked() {
 	      var self = this;
 	      var newGameRef = openGamesRef.push();
-	      var newGameKey = newGameRef.key();
+	      var newGameKey = newGameRef.key;
 	      loggedinuserRef.child('currenttable').set(newGameKey);
 	      openGamesRef.child(newGameKey).set({
 	        "gameid": newGameKey,
@@ -34854,7 +34871,7 @@
 	      });
 	    }
 
-	    // Ett öppet game bör nog göras om till en egen component
+	    // // Ett öppet game bör nog göras om till en egen component
 
 	  }, {
 	    key: 'render',
@@ -34874,6 +34891,12 @@
 	          null,
 	          'Poäng: ',
 	          this.state.userTotalScore
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'inloggad uid: ',
+	          this.state.uid
 	        ),
 	        _react2.default.createElement(
 	          'button',
@@ -34967,8 +34990,9 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var root = new Firebase("https://plump.firebaseio.com");
+	var root = firebase.database().ref();
 	var usersRef = root.child('users');
+	var auth = firebase.auth();
 
 	var SignUp = function (_React$Component) {
 	  _inherits(SignUp, _React$Component);
@@ -34976,49 +35000,55 @@
 	  function SignUp(props) {
 	    _classCallCheck(this, SignUp);
 
-	    return _possibleConstructorReturn(this, Object.getPrototypeOf(SignUp).call(this, props));
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SignUp).call(this, props));
+
+	    _this.state = { displayName: '' };
+	    return _this;
 	  }
 
 	  _createClass(SignUp, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var self = this;
+	      // Det här är temporärt. När man kommer hit ska man ju aldrig vara inloggad.
+	      // Först när man skapar en användare så loggas man in, och då körs denna kod.
+	      // Den känns ej intiutiv. Kommer åtgärdas när jag kommer på hur jag får tag på
+	      // datan för en användare som precis skapats.
+	      auth.onAuthStateChanged(function (user) {
+	        if (user) {
+	          // spara ner den nya användaren.
+	          var userid = user.uid;
+	          var newUser = {
+	            "displayname": self.state.displayName,
+	            "totalscore": 0,
+	            "currenttable": '',
+	            "uid": userid
+	          };
+	          root.child('users').child(userid).set(newUser);
+	          _reactRouter.browserHistory.push('/lobby');
+	        } else {
+	          // Gör inte ett JÄVLA SKIT.
+	        }
+	      });
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      root.off();
+	      usersRef.off();
+	    }
+	  }, {
 	    key: 'submitButtonClicked',
 	    value: function submitButtonClicked() {
 	      var inputedEmail = $('#emailInputField').val();
 	      var inputedPassword = $('#passwordInputField').val();
 	      var inputedUsername = $('#usernameInputField').val();
+	      var newState = this.state;
+	      newState.displayName = inputedUsername;
+	      this.setState(newState);
 
-	      console.log(inputedEmail);
-	      console.log(inputedPassword);
-
-	      root.createUser({
-
-	        email: inputedEmail,
-	        password: inputedPassword
-	      }, function (error, userData) {
-	        if (error) {
-	          console.log("Error creating user:", error);
-	        } else {
-	          console.log("Successfully created user account with uid:", userData.uid);
-	          root.authWithPassword({
-	            email: inputedEmail,
-	            password: inputedPassword
-	          }, function (error, authData) {
-	            if (error) {
-	              console.log("Login Failed!", error);
-	            } else {
-	              console.log("Authenticated successfully with payload:", authData);
-
-	              var userid = authData.uid;
-	              var newUser = {
-	                "displayname": inputedUsername,
-	                "totalscore": 0,
-	                "currenttable": ''
-	              };
-	              root.child('users').child(userid).set(newUser);
-
-	              _reactRouter.browserHistory.push('/lobby');
-	            }
-	          });
-	        }
+	      auth.createUserWithEmailAndPassword(inputedEmail, inputedPassword).catch(function (error) {
+	        console.error("Error creating user with email/password: " + error.message);
 	      });
 	    }
 	  }, {
@@ -35073,8 +35103,8 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var root = new Firebase("https://plump.firebaseio.com");
-	var authData;
+	var root = firebase.database().ref();
+	var auth;
 	var users;
 	var loggedinuserRef;
 	var currentGameRef;
@@ -35107,9 +35137,7 @@
 	      "qc": 50, "qh": 37, "qs": 24, "qd": 11,
 	      "kc": 51, "kh": 38, "ks": 25, "kd": 12
 	    };
-	    authData = root.getAuth();
-	    loggedinuserRef = usersRef.child(authData.uid);
-	    console.log("loggedinuserRef.uid: " + loggedinuserRef);
+
 	    var cards = [];
 	    var tableCards = [];
 	    _this.state = { uid: '', currentTable: '', currentRound: 10, deck: sortedDeck,
@@ -35137,10 +35165,12 @@
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      var self = this;
+	      auth = firebase.auth();
+	      loggedinuserRef = usersRef.child(auth.currentUser.uid);
 	      loggedinuserRef.on("value", function (snapshot) {
 	        var userData = snapshot.val();
 	        var newState = self.state;
-	        newState.uid = snapshot.key();
+	        newState.uid = snapshot.key;
 	        newState.currentTable = userData.currenttable;
 	        newState.username = userData.displayname;
 	        self.setState(newState);
@@ -35263,6 +35293,7 @@
 	      // Sätt en timer som timar ut efter ~20 sekunder. Har man inte valt tills dess så
 	      // autoväljs något åt en.
 
+	      // Varför har jag kommenterat bort detta?
 	      // var nextRound = this.state.currentRound - 1;
 	      // if(this.state.currentRound >= 2){
 	      //  gamesInProgressRef.child(this.state.currentTable).child('currentRound').set(nextRound);
@@ -35884,6 +35915,29 @@
 	          'p',
 	          null,
 	          this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          this.state.biddingMode == true ? "biddingMode = true" : "biddingMode = false"
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'myPlayerNumber = ',
+	          this.state.myPlayerNumber
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'this.state.uid = ',
+	          this.state.uid
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          'currentBidder = ',
+	          this.state.currentBidder
 	        ),
 	        _react2.default.createElement(
 	          'p',
