@@ -130,6 +130,7 @@ class Lobby extends React.Component{
                 "biddingMode": true,
                 "currentTableAsString": "",
                 "host": game.val().player1,
+                "gameIsOver": false,
                 "scoreBoard": {
                   "round10p1": 0,
                   "round10p2": 0,

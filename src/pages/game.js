@@ -1,4 +1,5 @@
 import React from 'react';
+import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 
 var root = firebase.database().ref();
 var auth;
@@ -61,7 +62,7 @@ class Game extends React.Component {
       round8p1: 0, round8p2: 0, round8p3: 0, round8p4: 0, round7p1: 0, round7p2: 0, round7p3: 0, round7p4: 0,
       round6p1: 0, round6p2: 0, round6p3: 0, round6p4: 0, round5p1: 0, round5p2: 0, round5p3: 0, round5p4: 0,
       round4p1: 0, round4p2: 0, round4p3: 0, round4p4: 0, round3p1: 0, round3p2: 0, round3p3: 0, round3p4: 0,
-      round2p1: 0, round2p2: 0, round2p3: 0, round2p4: 0};
+      round2p1: 0, round2p2: 0, round2p3: 0, round2p4: 0, gameIsOver: false};
     this.dealNewHand = this.dealNewHand.bind(this);
     this.getCardsForRound = this.getCardsForRound.bind(this);
     this.shuffle = this.shuffle.bind(this);
@@ -86,6 +87,10 @@ class Game extends React.Component {
       self.setState(newState);
       gamesInProgressRef.child(userData.currenttable).on("value", function(childsnapshot){
         var gameData = childsnapshot.val();
+        if(gameData.gameIsOver == true){
+          // Spelet är slut, stäng och slussa folk tillbaks till lobbyn.
+          browserHistory.push('/lobby');
+        }
         var newState = self.state;
         newState.currentTableAsString = gameData.currentTableAsString;
         newState.biddingMode    = gameData.biddingMode;
@@ -93,6 +98,7 @@ class Game extends React.Component {
         newState.currentDealer  = gameData.currentDealer;
         newState.currentRound   = gameData.currentHand;
         newState.currentSuit    = gameData.currentSuit;
+        newState.gameIsOver     = gameData.gameIsOver;
         newState.highestBid     = gameData.highestBid;
         newState.highestBidder  = gameData.highestBidder;
         newState.playersTurn    = gameData.playersTurn;
@@ -208,6 +214,12 @@ class Game extends React.Component {
         self.setState(newState);
       });
     });
+  }
+
+  componentWillUnmount(){
+    root.off();
+    usersRef.off();
+    gamesInProgressRef.off();
   }
 
   // det sista som händer är att man ändrar dealer och cards, annars skiter det sig med det asynchrona.
@@ -552,6 +564,7 @@ class Game extends React.Component {
                 var winnerNewScore = winnerOldScore + 50;
                 usersRef.child(playerPointsArray[3].uid).child("totalscore").set(winnerNewScore);
               });
+              gamesInProgressRef.child(this.state.currentTable).child("gameIsOver").set(true);
 
             } else {
               var newRound = this.state.currentRound - 1;
@@ -711,7 +724,8 @@ class Game extends React.Component {
     if(this.state.currentBidder == this.state.myPlayerNumber){
       var bid = $("#bidInput").val();
       bid = bid * 1;
-      if(isNaN(bid)  || bid < 0 || bid > currentRound || ((this.state.currentBidder == this.state.currentDealer) && (this.bidSum() + bid) == currentRound )){
+      // + 1 kommer av att budet för den som inte valt är -1 !!!
+      if(isNaN(bid)  || bid < 0 || bid > currentRound || ((this.state.currentBidder == this.state.currentDealer) && (this.bidSum() + bid + 1) == currentRound )){
         console.log("Felaktigt bud. bid: "+ bid );
       } else{
         // Budet var giltigt. Sparar ner det, gör olika checkar för att se vilket state man är i osv.
@@ -826,26 +840,23 @@ class Game extends React.Component {
             <tr>
               <td>Totalt</td>
               <td>{this.state.player1score}</td>
-              <td>{this.state.player1score}</td>
-              <td>{this.state.player1score}</td>
-              <td>{this.state.player1score}</td>
+              <td>{this.state.player2score}</td>
+              <td>{this.state.player3score}</td>
+              <td>{this.state.player4score}</td>
             </tr>
           </table>
         </div>
         <button onClick={this.debugKnapp.bind(this)}>Starta spelet</button>
-        <p>Mitt bud: {this.state.myBid}</p>
-        <p>Antal stick jag tagit: {this.state.myTrickCount}</p>
         <div id="biddingBox">
           <input id="bidInput" type="text" placeholder="Lägg ett bud" />
           <button onClick={this.bidButtonClicked.bind(this)}>Ok</button>
         </div>
-        <p>currentTableAsString: {this.state.currentTableAsString}</p>
         <div id="tableDiv">
           {this.state.cardsOnTable.map((card, index) => (
             <img key={index} src={"./images/cards/minifiedcards/"+card+".png"} />
           ))}
         </div>
-        <p>{this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"}</p>
+        <p>{this.state.myTrickCount}/{this.state.myBid} , {this.state.playersTurn == this.state.myPlayerNumber ? "Min tur" : "Någon annans tur"}</p>
         {this.state.myCards.map((card, index) => (
           <img key={index} className="cardImage" src={"./images/cards/minifiedcards/"+card+".png"} onClick={this.cardClicked.bind(this, card)}/>
         ))}
