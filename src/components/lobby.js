@@ -20,7 +20,6 @@ class Lobby extends React.Component{
   componentDidMount(){
     var self = this;
     auth = firebase.auth();
-    console.log("Användare inloggad i lobby: " + auth.currentUser.uid);
     loggedinuserRef = usersRef.child(auth.currentUser.uid);
     loggedinuserRef.on("value", function(snapshot){
       var userData = snapshot.val();
@@ -93,7 +92,8 @@ class Lobby extends React.Component{
                     "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
-                    "score": 0
+                    "score": 0,
+                    "currentCards": ""
                   },
                   "player2" : {
                     "uid": game.val().player2,
@@ -101,7 +101,8 @@ class Lobby extends React.Component{
                     "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
-                    "score": 0
+                    "score": 0,
+                    "currentCards": ""
                   },
                   "player3" : {
                     "uid": game.val().player3,
@@ -109,7 +110,8 @@ class Lobby extends React.Component{
                     "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
-                    "score": 0
+                    "score": 0,
+                    "currentCards": ""
                   },
                   "player4" : {
                     "uid": game.val().player4,
@@ -117,7 +119,8 @@ class Lobby extends React.Component{
                     "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
-                    "score": 0
+                    "score": 0,
+                    "currentCards": ""
                   }
                 },
                 "currentHand": 10,
@@ -172,10 +175,6 @@ class Lobby extends React.Component{
               });
             }
             openGamesRef.child(self.state.currentTable).remove();
-            console.log("player1: ." + game.val().player1 + ".");
-            console.log("player2: " + game.val().player2 + ".");
-            console.log("player3: " + game.val().player3 + ".");
-            console.log("player4: " + game.val().player4 + ".");
             browserHistory.push('/game');
           }
         }
@@ -219,7 +218,7 @@ class Lobby extends React.Component{
         || callback.val().player2 == self.state.uid
         || callback.val().player3 == self.state.uid
         || callback.val().player4 == self.state.uid){
-          console.log('Du sitter redan på detta bord!')
+          console.warn('Du sitter redan på detta bord!')
       } else {
         loggedinuserRef.child('currenttable').set(gameid);
         openGamesRef.child(gameid).child('player'+slotIndex).set(self.state.uid);
