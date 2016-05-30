@@ -11,16 +11,13 @@ var loggedinuserRef;
 class Lobby extends React.Component{
   constructor(props){
     super(props);
-
-
-    // myFuckingUid = auth.currentUser;
     this.state = {uid: '', username: '', userTotalScore: 0, openGames: [], currentTable: ''};
   }
 
   componentDidMount(){
     var self = this;
     auth = firebase.auth();
-    console.log("Användare inloggad i lobby: " + auth.currentUser.uid);
+    //console.log("Användare inloggad i lobby: " + auth.currentUser.uid);
     loggedinuserRef = usersRef.child(auth.currentUser.uid);
     loggedinuserRef.on("value", function(snapshot){
       var userData = snapshot.val();
@@ -93,7 +90,8 @@ class Lobby extends React.Component{
                     "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
-                    "score": 0
+                    "score": 0,
+                    "currentCards": ""
                   },
                   "player2" : {
                     "uid": game.val().player2,
@@ -101,7 +99,8 @@ class Lobby extends React.Component{
                     "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
-                    "score": 0
+                    "score": 0,
+                    "currentCards": ""
                   },
                   "player3" : {
                     "uid": game.val().player3,
@@ -109,7 +108,8 @@ class Lobby extends React.Component{
                     "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
-                    "score": 0
+                    "score": 0,
+                    "currentCards": ""
                   },
                   "player4" : {
                     "uid": game.val().player4,
@@ -117,7 +117,8 @@ class Lobby extends React.Component{
                     "currentBid": -1,
                     "cardPlayed": "",
                     "tricksTaken": 0,
-                    "score": 0
+                    "score": 0,
+                    "currentCards": ""
                   }
                 },
                 "currentHand": 10,
