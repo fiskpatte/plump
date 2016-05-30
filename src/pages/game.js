@@ -86,7 +86,6 @@ class Game extends React.Component {
       newState.username = userData.displayname;
       self.setState(newState);
       gamesInProgressRef.child(userData.currenttable).on("value", function(childsnapshot){
-
         var gameData = childsnapshot.val();
         if(gameData.gameIsOver == true){
           // Spelet är slut, stäng och slussa folk tillbaks till lobbyn.
@@ -188,18 +187,12 @@ class Game extends React.Component {
           tempCards = gameData.players.player4.currentCards;
         }
 
-        if(tempCards != ""){
-          for(var i = 0; i < tempCards.length; i += 2){
-            tempCardArray.push(tempCards.substring(i, i+2));
-          }
-          if(tempCardArray.length > 0){
-            tempCardArray = tempCardArray.sort(function(left, right) {
-                              return ranks[right] - ranks[left]; // descending order
-                            });
-          }
+        for(var i = 0; i < tempCards.length; i += 2){
+          tempCardArray.push(tempCards.substring(i, i+2));
         }
-
-
+        tempCardArray = tempCardArray.sort(function(left, right) {
+                          return ranks[right] - ranks[left]; // descending order
+                        });
         newState.myCards = tempCardArray;
 
         var tempCurrentTableArray = [];
@@ -211,17 +204,16 @@ class Game extends React.Component {
 
         $("#biddingBox").hide();
         // Om det är spelarens tur att buda så ska biddingBox visas
-        if(newState.biddingMode == true && newState.currentBidder == newState.myPlayerNumber) {
+        if(newState.biddingMode == true && newState.currentBidder == newState.myPlayerNumber){
           $("#bidInput").val("");
           $("#biddingBox").show();
-        } else {
+        } else{
           $("#biddingBox").hide();
         }
 
         self.setState(newState);
       });
     });
-
   }
 
   componentWillUnmount(){
@@ -255,6 +247,7 @@ class Game extends React.Component {
   getCardsForRound(cardsPerPerson){
     var shuffledDeck = this.shuffle(sortedDeck);
     var cardsForThisRound = [];
+    console.log("getCardsForRound.cardsPerPerson: " + cardsPerPerson);
     for(var i = 0; i < cardsPerPerson * 4; i++){
       cardsForThisRound.push(shuffledDeck[i]);
     }
@@ -289,6 +282,7 @@ class Game extends React.Component {
   // Här tar jag bort kortet man klickade på och uppdaterar db.
   cardClicked(card){
     if(this.state.playersTurn == this.state.myPlayerNumber && this.state.biddingMode == false && this.state.currentTableAsString.length < 8){
+      console.log("Går in i cardClicked");
       var validPlay = false;
       var curSuit = this.state.currentSuit;
       var myCards = "";
@@ -326,7 +320,10 @@ class Game extends React.Component {
 
         // Lägg till kortet till bordet
         var curCardsOnTable = this.state.currentTableAsString;
+        console.log("curCardsOnTable är nu: " + curCardsOnTable);
         curCardsOnTable += card;
+        console.log("Lägger till följande kort till bordet: " + card);
+        console.log("nu däremot är curCardsOnTable: " + curCardsOnTable);
         gamesInProgressRef.child(this.state.currentTable).child('currentTableAsString').set(curCardsOnTable);
 
         if(firstOutToPlay){
@@ -384,6 +381,7 @@ class Game extends React.Component {
                 newScore += pointsEarned;
                 gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("score").set(newScore);
               } else {
+                console.log("Player 1 klarade sig inte");
                 gamesInProgressRef.child(this.state.currentTable).child("scoreBoard").child("round" + this.state.currentRound + "p1").set(0);
               }
             } else if(this.state.player1bid == this.state.player1tricksTaken){
@@ -400,6 +398,7 @@ class Game extends React.Component {
                 gamesInProgressRef.child(this.state.currentTable).child("scoreBoard").child("round" + this.state.currentRound + "p1").set(pointsEarned);
                 gamesInProgressRef.child(this.state.currentTable).child("players").child("player1").child("score").set(newScore);
             } else {
+                console.log("Player 1 klarade sig inte");
                 gamesInProgressRef.child(this.state.currentTable).child("scoreBoard").child("round" + this.state.currentRound + "p1").set(0);
             }
 
@@ -418,6 +417,7 @@ class Game extends React.Component {
                 newScore += pointsEarned;
                 gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("score").set(newScore);
               } else {
+                console.log("Player 2 klarade sig inte");
                 gamesInProgressRef.child(this.state.currentTable).child("scoreBoard").child("round" + this.state.currentRound + "p2").set(0);
               }
             } else {
@@ -434,6 +434,7 @@ class Game extends React.Component {
                 newScore += pointsEarned;
                 gamesInProgressRef.child(this.state.currentTable).child("players").child("player2").child("score").set(newScore);
               } else {
+                console.log("Player 2 klarade sig inte");
                 gamesInProgressRef.child(this.state.currentTable).child("scoreBoard").child("round"+this.state.currentRound+"p2").set(0);
               }
             }
@@ -452,6 +453,7 @@ class Game extends React.Component {
                 newScore += pointsEarned;
                 gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("score").set(newScore);
               } else {
+                console.log("Player 3 klarade sig inte");
                 gamesInProgressRef.child(this.state.currentTable).child("scoreBoard").child("round" + this.state.currentRound + "p3").set(0);
               }
             } else {
@@ -468,6 +470,7 @@ class Game extends React.Component {
                 newScore += pointsEarned;
                 gamesInProgressRef.child(this.state.currentTable).child("players").child("player3").child("score").set(newScore);
               } else {
+                console.log("Player 3 klarade sig inte");
                 gamesInProgressRef.child(this.state.currentTable).child("scoreBoard").child("round" + this.state.currentRound + "p3").set(0);
               }
             }
@@ -486,6 +489,7 @@ class Game extends React.Component {
                 newScore += pointsEarned;
                 gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("score").set(newScore);
               } else {
+                console.log("Player 4 klarade sig inte");
                 gamesInProgressRef.child(this.state.currentTable).child("scoreBoard").child("round" + this.state.currentRound + "p4").set(0);
               }
             } else {
@@ -502,6 +506,7 @@ class Game extends React.Component {
                 newScore += pointsEarned;
                 gamesInProgressRef.child(this.state.currentTable).child("players").child("player4").child("score").set(newScore);
               } else {
+                console.log("Player 4 klarade sig inte");
                 gamesInProgressRef.child(this.state.currentTable).child("scoreBoard").child("round" + this.state.currentRound + "p4").set(0);
               }
             }
@@ -666,6 +671,10 @@ class Game extends React.Component {
     if(check4 && player4card[0] == '2'){ return 4;}
   }
 
+  firstIsHigher(card1, card2){
+
+  }
+
   trickOver(myNumber){
     if(myNumber == 1){
       if(this.state.player2cardPlayed != "" && this.state.player3cardPlayed != ""
@@ -706,6 +715,7 @@ class Game extends React.Component {
     tempSum += this.state.player2bid;
     tempSum += this.state.player3bid;
     tempSum += this.state.player4bid;
+    console.log("bidSum returns: " + tempSum);
     return  tempSum;
   }
 
@@ -719,6 +729,7 @@ class Game extends React.Component {
         console.log("Felaktigt bud. bid: "+ bid );
       } else{
         // Budet var giltigt. Sparar ner det, gör olika checkar för att se vilket state man är i osv.
+        console.log("sparar bud...");
         gamesInProgressRef.child(this.state.currentTable).child('players').child('player' + this.state.myPlayerNumber).child('currentBid').set(bid);
 
         // detta behävs fär att slippa async-problem
@@ -756,87 +767,83 @@ class Game extends React.Component {
       <div>
         <div id="scoreBoard">
           <table>
-            <thead>
-              <tr>
-                <th></th>
-                <th>Spelare 1</th>
-                <th>Spelare 2</th>
-                <th>Spelare 3</th>
-                <th>Spelare 4</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>10</td>
-                <td>{this.state.currentRound == 10 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 10 ? this.state.round10p1 : "")}</td>
-                <td>{this.state.currentRound == 10 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 10 ? this.state.round10p2 : "")}</td>
-                <td>{this.state.currentRound == 10 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 10 ? this.state.round10p3 : "")}</td>
-                <td>{this.state.currentRound == 10 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 10 ? this.state.round10p4 : "")}</td>
-              </tr>
-              <tr>
-                <td>9</td>
-                <td>{this.state.currentRound == 9 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 9 ? this.state.round9p1 : "")}</td>
-                <td>{this.state.currentRound == 9 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 9 ? this.state.round9p2 : "")}</td>
-                <td>{this.state.currentRound == 9 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 9 ? this.state.round9p3 : "")}</td>
-                <td>{this.state.currentRound == 9 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 9 ? this.state.round9p4 : "")}</td>
-              </tr>
-              <tr>
-                <td>8</td>
-                <td>{this.state.currentRound == 8 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 8 ? this.state.round8p1 : "")}</td>
-                <td>{this.state.currentRound == 8 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 8 ? this.state.round8p2 : "")}</td>
-                <td>{this.state.currentRound == 8 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 8 ? this.state.round8p3 : "")}</td>
-                <td>{this.state.currentRound == 8 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 8 ? this.state.round8p4 : "")}</td>
-              </tr>
-              <tr>
-                <td>7</td>
-                <td>{this.state.currentRound == 7 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 7 ? this.state.round7p1 : "")}</td>
-                <td>{this.state.currentRound == 7 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 7 ? this.state.round7p2 : "")}</td>
-                <td>{this.state.currentRound == 7 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 7 ? this.state.round7p3 : "")}</td>
-                <td>{this.state.currentRound == 7 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 7 ? this.state.round7p4 : "")}</td>
-              </tr>
-              <tr>
-                <td>6</td>
-                <td>{this.state.currentRound == 6 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 6 ? this.state.round6p1 : "")}</td>
-                <td>{this.state.currentRound == 6 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 6 ? this.state.round6p2 : "")}</td>
-                <td>{this.state.currentRound == 6 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 6 ? this.state.round6p3 : "")}</td>
-                <td>{this.state.currentRound == 6 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 6 ? this.state.round6p4 : "")}</td>
-              </tr>
-              <tr>
-                <td>5</td>
-                <td>{this.state.currentRound == 5 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 5 ? this.state.round5p1 : "")}</td>
-                <td>{this.state.currentRound == 5 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 5 ? this.state.round5p2 : "")}</td>
-                <td>{this.state.currentRound == 5 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 5 ? this.state.round5p3 : "")}</td>
-                <td>{this.state.currentRound == 5 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 5 ? this.state.round5p4 : "")}</td>
-              </tr>
-              <tr>
-                <td>4</td>
-                <td>{this.state.currentRound == 4 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 4 ? this.state.round4p1 : "")}</td>
-                <td>{this.state.currentRound == 4 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 4 ? this.state.round4p2 : "")}</td>
-                <td>{this.state.currentRound == 4 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 4 ? this.state.round4p3 : "")}</td>
-                <td>{this.state.currentRound == 4 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 4 ? this.state.round4p4 : "")}</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>{this.state.currentRound == 3 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 3 ? this.state.round3p1 : "")}</td>
-                <td>{this.state.currentRound == 3 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 3 ? this.state.round3p2 : "")}</td>
-                <td>{this.state.currentRound == 3 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 3 ? this.state.round3p3 : "")}</td>
-                <td>{this.state.currentRound == 3 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 3 ? this.state.round3p4 : "")}</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>{this.state.currentRound == 2 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 2 ? this.state.round2p1 : "")}</td>
-                <td>{this.state.currentRound == 2 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 2 ? this.state.round2p2 : "")}</td>
-                <td>{this.state.currentRound == 2 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 2 ? this.state.round2p3 : "")}</td>
-                <td>{this.state.currentRound == 2 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 2 ? this.state.round2p4 : "")}</td>
-              </tr>
-              <tr>
-                <td>Totalt</td>
-                <td>{this.state.player1score}</td>
-                <td>{this.state.player2score}</td>
-                <td>{this.state.player3score}</td>
-                <td>{this.state.player4score}</td>
-              </tr>
-            </tbody>
+            <tr>
+              <th></th>
+              <th>Spelare 1</th>
+              <th>Spelare 2</th>
+              <th>Spelare 3</th>
+              <th>Spelare 4</th>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>{this.state.currentRound == 10 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 10 ? this.state.round10p1 : "")}</td>
+              <td>{this.state.currentRound == 10 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 10 ? this.state.round10p2 : "")}</td>
+              <td>{this.state.currentRound == 10 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 10 ? this.state.round10p3 : "")}</td>
+              <td>{this.state.currentRound == 10 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 10 ? this.state.round10p4 : "")}</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>{this.state.currentRound == 9 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 9 ? this.state.round9p1 : "")}</td>
+              <td>{this.state.currentRound == 9 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 9 ? this.state.round9p2 : "")}</td>
+              <td>{this.state.currentRound == 9 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 9 ? this.state.round9p3 : "")}</td>
+              <td>{this.state.currentRound == 9 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 9 ? this.state.round9p4 : "")}</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>{this.state.currentRound == 8 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 8 ? this.state.round8p1 : "")}</td>
+              <td>{this.state.currentRound == 8 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 8 ? this.state.round8p2 : "")}</td>
+              <td>{this.state.currentRound == 8 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 8 ? this.state.round8p3 : "")}</td>
+              <td>{this.state.currentRound == 8 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 8 ? this.state.round8p4 : "")}</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>{this.state.currentRound == 7 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 7 ? this.state.round7p1 : "")}</td>
+              <td>{this.state.currentRound == 7 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 7 ? this.state.round7p2 : "")}</td>
+              <td>{this.state.currentRound == 7 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 7 ? this.state.round7p3 : "")}</td>
+              <td>{this.state.currentRound == 7 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 7 ? this.state.round7p4 : "")}</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>{this.state.currentRound == 6 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 6 ? this.state.round6p1 : "")}</td>
+              <td>{this.state.currentRound == 6 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 6 ? this.state.round6p2 : "")}</td>
+              <td>{this.state.currentRound == 6 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 6 ? this.state.round6p3 : "")}</td>
+              <td>{this.state.currentRound == 6 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 6 ? this.state.round6p4 : "")}</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>{this.state.currentRound == 5 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 5 ? this.state.round5p1 : "")}</td>
+              <td>{this.state.currentRound == 5 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 5 ? this.state.round5p2 : "")}</td>
+              <td>{this.state.currentRound == 5 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 5 ? this.state.round5p3 : "")}</td>
+              <td>{this.state.currentRound == 5 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 5 ? this.state.round5p4 : "")}</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>{this.state.currentRound == 4 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 4 ? this.state.round4p1 : "")}</td>
+              <td>{this.state.currentRound == 4 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 4 ? this.state.round4p2 : "")}</td>
+              <td>{this.state.currentRound == 4 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 4 ? this.state.round4p3 : "")}</td>
+              <td>{this.state.currentRound == 4 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 4 ? this.state.round4p4 : "")}</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>{this.state.currentRound == 3 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 3 ? this.state.round3p1 : "")}</td>
+              <td>{this.state.currentRound == 3 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 3 ? this.state.round3p2 : "")}</td>
+              <td>{this.state.currentRound == 3 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 3 ? this.state.round3p3 : "")}</td>
+              <td>{this.state.currentRound == 3 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 3 ? this.state.round3p4 : "")}</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>{this.state.currentRound == 2 ? (this.state.player1bid == -1 ? "" : this.state.player1bid) : (this.state.currentRound < 2 ? this.state.round2p1 : "")}</td>
+              <td>{this.state.currentRound == 2 ? (this.state.player2bid == -1 ? "" : this.state.player2bid) : (this.state.currentRound < 2 ? this.state.round2p2 : "")}</td>
+              <td>{this.state.currentRound == 2 ? (this.state.player3bid == -1 ? "" : this.state.player3bid) : (this.state.currentRound < 2 ? this.state.round2p3 : "")}</td>
+              <td>{this.state.currentRound == 2 ? (this.state.player4bid == -1 ? "" : this.state.player4bid) : (this.state.currentRound < 2 ? this.state.round2p4 : "")}</td>
+            </tr>
+            <tr>
+              <td>Totalt</td>
+              <td>{this.state.player1score}</td>
+              <td>{this.state.player2score}</td>
+              <td>{this.state.player3score}</td>
+              <td>{this.state.player4score}</td>
+            </tr>
           </table>
         </div>
         <button onClick={this.debugKnapp.bind(this)}>Starta spelet</button>

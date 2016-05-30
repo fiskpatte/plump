@@ -30,11 +30,11 @@ class LoginPage extends React.Component {
     var self = this;
     var signedInUser = firebase.User;
     if(signedInUser){
-    //  console.log('Inloggad innan mount. Försöker logga ut.');
+      console.log('Inloggad innan mount. Försöker logga ut.');
       auth.signOut().then(function() {
-      //  console.log("Signed out");
+        console.log("Signed out");
       }, function(error){
-      //  console.error("Sign out error: ", error);
+        console.error("Sign out error: ", error);
       });
     }
 
@@ -42,12 +42,12 @@ class LoginPage extends React.Component {
   }
 
   debugAuth(){
-    // var user = firebase.auth().currentUser;
-    // if(user) {
-    //   console.log(user.uid);
-    // } else {
-    //   console.log("Ej inloggad");
-    // }
+    var user = firebase.auth().currentUser;
+    if(user) {
+      console.log(user.uid);
+    } else {
+      console.log("Ej inloggad");
+    }
   }
 
   componentWillUnmount(){
@@ -62,12 +62,12 @@ class LoginPage extends React.Component {
       // User signed in
 
       var uid = result.user.uid;
-    //  console.log("Signed in with uid: " + uid);
+      console.log("Signed in with uid: " + uid);
       var userExists = false;
       for(var user in self.state.users){
         if(self.state.users[user].uid === uid){
           // usern fanns redan
-    //      console.log("Han fanns redan");
+          console.log("Han fanns redan");
           userExists = true;
         }
       }
@@ -98,7 +98,7 @@ class LoginPage extends React.Component {
     var inputedPassword = $('#passwordInputField').val();
     var signedIn = false;
     auth.signInWithEmailAndPassword(inputedEmail, inputedPassword).then(function(result){
-  //    console.log("Kom in här");
+      console.log("Kom in här");
       if(result != null){
         browserHistory.push('/lobby');
       }
