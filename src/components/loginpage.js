@@ -118,28 +118,30 @@ class LoginPage extends React.Component {
 
   render() {
     return (
-      <div>
+      <div id="loginPageDiv">
         <div>
-          <p>PLUMP</p>
+        <img id="bildLogga" src="./images/plump1.jpg" />
+        </div>
+
+        <div>
+          <input id="emailInputField" className="form-control" type="text" placeholder="Email"/><br />
+          <input id="passwordInputField" className="form-control" type="password" placeholder="Lösenord"/><br />
         </div>
         <div>
-          <button id="signUpButton" onClick={this.loginWithFacebookButtonClicked.bind(this)}>Logga in med Facebook</button>
+          <button onClick={this.signInWithEmailButtonClicked.bind(this)} id="loggaIn" className="btn btn-primary">LOGGA IN</button>
+          <span id="rememberMe"><input id="checkBoxRememberMe" type="checkbox" value="yes"/>Håll mig inloggad</span><br />
+        </div>
+        <div id="gloemtInlogg">
+            <a href ="¤">Har du glömt dina inloggningsuppgifter?</a>
+</div>
+        <div>
+          <button id="signUpButton" className="btn btn-primary" onClick={this.loginWithFacebookButtonClicked.bind(this)}>LOGGA IN MED FACEBOOK</button>
         </div>
         <div>
-        <p>-----eller-----</p>
-        </div>
-        <div>
-          <input id="emailInputField" type="text" placeholder="Email"/>
-          <input id="passwordInputField" type="password" placeholder="Lösenord"/>
-        </div>
-        <div>
-          <span><input id="checkBoxRememberMe" type="checkbox" value="yes"/>Kom ihåg mig</span><button onClick={this.signInWithEmailButtonClicked.bind(this)}>Logga in</button>
-        </div>
-        <a href="¤">Har du glömt dina inloggningsuppgifter?</a>
-        <button onClick={this.signupButtonClicked.bind(this)}>Registrera dig</button>
-        <button onClick={this.logoutButtonClicked.bind(this)}>Logga ut</button>
-        <button onClick={this.debugAuth.bind(this)}>kolla auth</button>
+          <button id="newUserButton" onClick={this.signupButtonClicked.bind(this)}>NY ANVÄNDARE</button>
+          </div>
       </div>
+
     )
   }
 }
